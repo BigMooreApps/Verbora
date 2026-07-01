@@ -1149,7 +1149,7 @@ export default function App() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleToggleListening}
-            className={`w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center relative transition-all cursor-pointer ${
+            className={`w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center relative transition-all cursor-pointer ${
               isListening 
                 ? "bg-gradient-to-tr from-rose-500 to-red-600 shadow-[0_0_30px_rgba(244,63,94,0.4)]" 
                 : "bg-gradient-to-tr from-violet-600 via-blue-500 to-teal-400 shadow-[0_0_40px_rgba(59,130,246,0.35)] text-white hover:brightness-110"
@@ -1157,9 +1157,9 @@ export default function App() {
             id="mic-circle"
           >
             {isListening ? (
-              <MicOff className="w-6 h-6 sm:w-9 sm:h-9 text-white animate-pulse" />
+              <MicOff className="w-3 h-3 sm:w-[18px] sm:h-[18px] text-white animate-pulse" />
             ) : (
-              <Mic className="w-6 h-6 sm:w-9 sm:h-9 text-white" />
+              <Mic className="w-3 h-3 sm:w-[18px] sm:h-[18px] text-white" />
             )}
  
             {/* Recording visual effect ring */}

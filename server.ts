@@ -14,23 +14,20 @@ async function startServer() {
   app.use(express.json());
 
   // Lazy initialize the client only when needed to prevent application crashes
-  let aiClient: GoogleGenAI | null = null;
-  function getGenAI(): GoogleGenAI {
-    if (!aiClient) {
-      const key = process.env.GEMINI_API_KEY;
-      if (!key) {
-        throw new Error("GEMINI_API_KEY environment variable is required.");
-      }
-      aiClient = new GoogleGenAI({
-        apiKey: key,
-        httpOptions: {
-          headers: {
-            "User-Agent": "aistudio-build",
-          },
-        },
-      });
+  // Lazy initialize the client only when needed to prevent application crashes
+  function getGenAI(req: express.Request): GoogleGenAI {
+    const key = req.headers["x-gemini-api-key"] || process.env.GEMINI_API_KEY;
+    if (!key) {
+      throw new Error("GEMINI_API_KEY_MISSING");
     }
-    return aiClient;
+    return new GoogleGenAI({
+      apiKey: key as string,
+      httpOptions: {
+        headers: {
+          "User-Agent": "aistudio-build",
+        },
+      },
+    });
   }
 
   // Pronunciation analyzer route using Gemini
@@ -45,14 +42,15 @@ async function startServer() {
         });
       }
 
-      if (!process.env.GEMINI_API_KEY) {
+      const apiKey = req.headers["x-gemini-api-key"] || process.env.GEMINI_API_KEY;
+      if (!apiKey) {
         return res.status(500).json({
           error: "GEMINI_API_KEY_MISSING",
-          message: "Para calificar tu pronunciación con IA avanzada, por favor configura tu GEMINI_API_KEY en el panel de 'Settings > Secrets' en la barra lateral de AI Studio.",
+          message: "Para calificar tu pronunciación con IA avanzada, por favor configura tu clave API de Gemini.",
         });
       }
 
-      const ai = getGenAI();
+      const ai = getGenAI(req);
 
       const systemInstruction = `Eres un entrenador de pronunciación en inglés experto y de gran apoyo, especializado en enseñar a personas de habla hispana cómo dominar la entonación y pronunciación de verbos en inglés en distintos tiempos verbales.
 Compararás la frase esperada en inglés (expectedText) con la transcripción de voz lograda por el micrófono del usuario (transcribedText).
@@ -144,14 +142,15 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
         return res.status(400).json({ error: "BAD_REQUEST", message: "Falta el texto a sintetizar." });
       }
 
-      if (!process.env.GEMINI_API_KEY) {
+      const apiKey = req.headers["x-gemini-api-key"] || process.env.GEMINI_API_KEY;
+      if (!apiKey) {
         return res.status(500).json({
           error: "GEMINI_API_KEY_MISSING",
-          message: "Para usar voces de IA ultra-reales, por favor configura tu GEMINI_API_KEY en Settings > Secrets.",
+          message: "Para usar voces de IA ultra-reales, por favor configura tu clave API de Gemini.",
         });
       }
 
-      const ai = getGenAI();
+      const ai = getGenAI(req);
       const response = await ai.models.generateContent({
         model: "gemini-3.1-flash-tts-preview",
         contents: [{ parts: [{ text: text }] }],
@@ -603,7 +602,8 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
       }
 
       // If GEMINI_API_KEY is not defined, immediately use highly robust fallback tenses
-      if (!process.env.GEMINI_API_KEY) {
+      const apiKey = req.headers["x-gemini-api-key"] || process.env.GEMINI_API_KEY;
+      if (!apiKey) {
         console.log("No GEMINI_API_KEY found, using robust fallback generator.");
         const fallbackSentences = generateFallbackTenses(resolvedEN, resolvedES);
         return res.json({
@@ -614,7 +614,7 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
         });
       }
 
-      const ai = getGenAI();
+      const ai = getGenAI(req);
 
       const systemInstruction = `Eres un experto lingüista y profesor de inglés para hispanohablantes. 
 Tu tarea es tomar una entrada en texto (que puede ser un verbo, palabra o frase corta en inglés o español), analizarla, determinar su infinitivo o forma base correcta en inglés y su traducción correcta al español, determinar su nivel de dificultad ("Básico", "Intermedio" o "Avanzado"), y generar una lista de EXACTAMENTE 12 oraciones de ejemplo (una para cada uno de los 12 tiempos verbales de la gramática inglesa) usando esa palabra/verbo de forma natural.

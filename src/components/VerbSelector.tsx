@@ -65,10 +65,12 @@ export function VerbSelector({
     setIsGenerating(true);
 
     try {
+      const userApiKey = localStorage.getItem("geminiApiKey") || "";
       const response = await fetch("/api/generate-tenses", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(userApiKey ? { "x-gemini-api-key": userApiKey } : {})
         },
         body: JSON.stringify({
           inputText: inputText.trim(),

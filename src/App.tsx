@@ -21,7 +21,8 @@ import {
   Flame,
   Star,
   Settings,
-  X
+  X,
+  Key
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -236,6 +237,14 @@ export default function App() {
   // --- Voice & Speed Settings states ---
   const [isConfigOpen, setIsConfigOpen] = useState<boolean>(false);
   const [ttsWarning, setTtsWarning] = useState<string | null>(null);
+  const [userApiKey, setUserApiKey] = useState<string>(() => localStorage.getItem("geminiApiKey") || "");
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
+
+  const saveApiKey = (key: string) => {
+    setUserApiKey(key);
+    localStorage.setItem("geminiApiKey", key);
+    setIsApiKeyModalOpen(false);
+  };
   const [useAllSubjects, setUseAllSubjects] = useState<boolean>(() => {
     const saved = localStorage.getItem("use_all_subjects");
     return saved !== "false"; // Default to true
@@ -528,6 +537,7 @@ export default function App() {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              ...(userApiKey ? { "x-gemini-api-key": userApiKey } : {})
             },
             body: JSON.stringify({ text, voiceName }),
           });
@@ -726,6 +736,7 @@ export default function App() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(userApiKey ? { "x-gemini-api-key": userApiKey } : {})
         },
         body: JSON.stringify({
           expectedText: activeSentence.sentence,
@@ -877,6 +888,14 @@ export default function App() {
           </div>
           
           <div className="flex items-center gap-1.5 shrink-0">
+            {/* API Key Button */}
+            <button
+              onClick={() => setIsApiKeyModalOpen(true)}
+              className="p-1.5 sm:p-2 rounded-xl bg-gradient-to-r from-violet-600/15 via-blue-500/15 to-teal-500/15 hover:from-violet-600/25 hover:via-blue-500/25 hover:to-teal-500/25 border border-blue-500/30 hover:border-blue-500/50 text-white/90 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer select-none shadow-sm"
+              title="Configurar API Key"
+            >
+              {userApiKey ? <Key className="w-4 h-4 text-teal-400" /> : <AlertTriangle className="w-4 h-4 text-amber-400" />}
+            </button>
             {/* Configuration Button */}
             <button
               onClick={() => setIsConfigOpen(true)}
@@ -918,44 +937,7 @@ export default function App() {
           onDeleteVerb={handleDeleteVerb}
         />
 
-        {/* TTS Warning banner */}
-        <AnimatePresence>
-          {ttsWarning && (
-            <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              className="bg-amber-500/10 border border-amber-500/20 text-amber-200 text-[11.5px] rounded-2xl p-3.5 flex items-start gap-3 shadow-lg shrink-0 relative overflow-hidden"
-            >
-              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-              <div className="flex-1 pr-6">
-                <span className="font-bold block text-amber-300">Aviso de Voz de Respaldo:</span>
-                <span className="text-white/70 block mt-0.5 leading-relaxed">{ttsWarning}</span>
-                {(ttsWarning.toLowerCase().includes("cuota") || ttsWarning.toLowerCase().includes("límite") || ttsWarning.toLowerCase().includes("quota") || ttsWarning.toLowerCase().includes("429") || ttsWarning.toLowerCase().includes("exhausted")) && (
-                  <button
-                    onClick={() => {
-                      if (voices.length > 0) {
-                        setSelectedVoiceName(voices[0].name);
-                      } else {
-                        setSelectedVoiceName("");
-                      }
-                      setTtsWarning(null);
-                    }}
-                    className="mt-2.5 px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-xs font-bold rounded-xl border border-amber-500/30 transition-all cursor-pointer inline-flex items-center gap-1"
-                  >
-                    <span>Cambiar a Voz Local del Dispositivo (Sin límites)</span>
-                  </button>
-                )}
-              </div>
-              <button
-                onClick={() => setTtsWarning(null)}
-                className="absolute top-3 right-3 text-white/40 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* TTS Warning banner removed */}
 
         {/* CENTRAL MASTER WORKOUT CARD */}
         <div className="flex-1 md:flex-initial bg-white/5 backdrop-blur-2xl rounded-3xl p-3.5 sm:p-8 md:p-10 shadow-2xl border border-white/10 relative flex flex-col justify-start overflow-y-auto md:overflow-visible min-h-0 scrollbar-thin" id="workout-card">
@@ -1436,9 +1418,65 @@ export default function App() {
             </div>
           )}
         </AnimatePresence>
+
+        {/* API Key Modal */}
+        <AnimatePresence>
+          {isApiKeyModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsApiKeyModalOpen(false)}
+                className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm cursor-pointer"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="relative bg-slate-900 border border-white/10 p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-md mx-auto flex flex-col gap-6"
+              >
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <Key className="w-5 h-5 text-teal-400" />
+                    Configurar API Key
+                  </h3>
+                  <button
+                    onClick={() => setIsApiKeyModalOpen(false)}
+                    className="p-2 text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                <div className="space-y-3">
+                  <p className="text-sm text-white/60">
+                    Ingresa tu API Key de Gemini para activar las voces ultrarrealistas y las evaluaciones avanzadas por IA.
+                  </p>
+                  <input
+                    type="password"
+                    placeholder="AIzaSy..."
+                    defaultValue={userApiKey}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white placeholder-white/30 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        saveApiKey(e.currentTarget.value);
+                      }
+                    }}
+                    onBlur={(e) => saveApiKey(e.target.value)}
+                  />
+                  {!userApiKey && (
+                    <p className="text-xs text-amber-400 flex items-center gap-1.5 mt-2">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      El uso de la IA de Gemini está limitado si no agregas tu propia llave.
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
  
-
-
       </div>
     </div>
   );

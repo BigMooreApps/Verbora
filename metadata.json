@@ -1,0 +1,10 @@
+{
+  "name": "Verbora",
+  "description": "Domina los tiempos. Habla sin límites. Practica tu pronunciación en inglés a través de diferentes tiempos verbales con retroalimentación de IA en tiempo real.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

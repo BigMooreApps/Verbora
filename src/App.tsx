@@ -22,7 +22,8 @@ import {
   Star,
   Settings,
   X,
-  Key
+  Key,
+  Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -240,10 +241,18 @@ export default function App() {
   const [userApiKey, setUserApiKey] = useState<string>(() => localStorage.getItem("geminiApiKey") || "");
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
   const [highlightApiKey, setHighlightApiKey] = useState<boolean>(false);
+  const [tempApiKey, setTempApiKey] = useState<string>("");
+
+  useEffect(() => {
+    if (isApiKeyModalOpen) {
+      setTempApiKey(userApiKey);
+    }
+  }, [isApiKeyModalOpen, userApiKey]);
 
   const saveApiKey = (key: string) => {
-    setUserApiKey(key);
-    localStorage.setItem("geminiApiKey", key);
+    const trimmedKey = key.trim();
+    setUserApiKey(trimmedKey);
+    localStorage.setItem("geminiApiKey", trimmedKey);
     setIsApiKeyModalOpen(false);
   };
   const [useAllSubjects, setUseAllSubjects] = useState<boolean>(() => {
@@ -1463,28 +1472,36 @@ export default function App() {
                   </button>
                 </div>
                 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <p className="text-sm text-white/60">
                     Ingresa tu API Key (Gemini, ChatGPT u otros compatibles) para activar las voces ultrarrealistas y las evaluaciones avanzadas por IA.
                   </p>
                   <input
                     type="password"
                     placeholder="AIzaSy..."
-                    defaultValue={userApiKey}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white placeholder-white/30 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                    value={tempApiKey}
+                    onChange={(e) => setTempApiKey(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white placeholder-white/30 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all font-mono"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        saveApiKey(e.currentTarget.value);
+                        saveApiKey(tempApiKey);
                       }
                     }}
-                    onBlur={(e) => saveApiKey(e.target.value)}
                   />
-                  {!userApiKey && (
+                  {!tempApiKey && (
                     <p className="text-xs text-amber-400 flex items-center gap-1.5 mt-2">
                       <AlertTriangle className="w-3.5 h-3.5" />
                       El uso de la IA de Gemini está limitado si no agregas tu propia llave.
                     </p>
                   )}
+                  
+                  <button
+                    onClick={() => saveApiKey(tempApiKey)}
+                    className="w-full mt-2 py-3 bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-500 hover:to-emerald-500 text-slate-950 font-extrabold rounded-xl shadow-lg transition-all transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <Check className="w-4 h-4 text-slate-950" strokeWidth={3} />
+                    Guardar Clave
+                  </button>
                 </div>
               </motion.div>
             </div>

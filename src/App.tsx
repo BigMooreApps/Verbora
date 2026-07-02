@@ -422,6 +422,7 @@ export default function App() {
 
   // Speech Recognition reference
   const recognitionRef = useRef<any>(null);
+  const latestTranscriptRef = useRef<string>("");
 
   // Audio playback references for Gemini high-quality TTS
   const currentAudioSourceRef = useRef<AudioBufferSourceNode | null>(null);
@@ -717,6 +718,7 @@ export default function App() {
       setMicError(null);
       setServerError(null);
       setAnalysisResult(null);
+      latestTranscriptRef.current = "";
 
       try {
         const SpeechRec = SpeechRecognitionAPI;
@@ -742,6 +744,11 @@ export default function App() {
           }
 
           if (interim) setInterimTranscript(interim);
+          const currentText = (final || interim || "").trim();
+          if (currentText) {
+            latestTranscriptRef.current = currentText;
+          }
+
           if (final) {
             const cleanFinal = final.trim();
             setFinalTranscript(cleanFinal);
@@ -765,6 +772,11 @@ export default function App() {
 
         rec.onend = () => {
           setIsListening(false);
+          // If we have some transcript but haven't graded it yet, trigger it immediately!
+          const textToSubmit = latestTranscriptRef.current.trim();
+          if (textToSubmit && !isAnalyzing && !analysisResult) {
+            handleGradePronunciation(textToSubmit);
+          }
         };
 
         recognitionRef.current = rec;

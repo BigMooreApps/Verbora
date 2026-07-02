@@ -1703,19 +1703,16 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* MODAL DE ERRORES (MICRÓFONO / SERVIDOR) */}
+        {/* MODAL DE ERRORES (MICRÓFONO) */}
         <AnimatePresence>
-          {(micError || serverError) && (
+          {micError && (
             <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
               {/* Backdrop */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={() => {
-                  setMicError(null);
-                  setServerError(null);
-                }}
+                onClick={() => setMicError(null)}
                 className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
               />
 
@@ -1729,24 +1726,12 @@ export default function App() {
                 <AlertTriangle className="w-10 h-10 text-rose-400 mx-auto" />
                 <h3 className="text-white font-bold text-sm">Ocurrió un inconveniente</h3>
                 
-                {serverError === "GEMINI_API_KEY_MISSING" ? (
-                  <div className="text-left space-y-2">
-                    <span className="font-bold text-xs text-rose-200 block text-center">Requiere Gemini API Key</span>
-                    <p className="text-white/60 leading-relaxed text-[11px]">
-                      El tutor de Inteligencia Artificial requiere configurar tu propia clave. Abre la pestaña <strong>Settings &gt; Secrets</strong> en el panel de control de AI Studio y añade tu clave como <strong>GEMINI_API_KEY</strong>.
-                    </p>
-                  </div>
-                ) : (
-                  <p className="text-xs text-rose-300 bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl">
-                    {micError || serverError}
-                  </p>
-                )}
+                <p className="text-xs text-rose-300 bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl">
+                  {micError}
+                </p>
 
                 <button
-                  onClick={() => {
-                    setMicError(null);
-                    setServerError(null);
-                  }}
+                  onClick={() => setMicError(null)}
                   className="w-full py-2.5 bg-white/10 hover:bg-white/15 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
                 >
                   Cerrar

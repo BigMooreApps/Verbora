@@ -24,6 +24,7 @@ async function startServer() {
       apiKey: key as string,
       httpOptions: {
         headers: {
+          "x-goog-api-key": key as string,
           "User-Agent": "aistudio-build",
         },
       },

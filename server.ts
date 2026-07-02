@@ -606,10 +606,6 @@ async function startServer() {
           difficulty: resolvedDiff,
           sentences: fallbackSentences
         });
-      }
-
-      const ai = getGenAI(req);
-
       const systemInstruction = `Eres un experto lingüista y profesor de inglés para hispanohablantes. 
 Tu tarea es tomar una entrada en texto (que puede ser un verbo, palabra o frase corta en inglés o español), analizarla, determinar su infinitivo o forma base correcta en inglés y su traducción correcta al español, determinar su nivel de dificultad ("Básico", "Intermedio" o "Avanzado"), y generar una lista de EXACTAMENTE 12 oraciones de ejemplo (una para cada uno de los 12 tiempos verbales de la gramática inglesa) usando esa palabra/verbo de forma natural.
 

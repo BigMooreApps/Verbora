@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 import fs from "fs";
 
@@ -12,24 +11,6 @@ async function startServer() {
 
   // Accept JSON payload
   app.use(express.json());
-
-  // Lazy initialize the client only when needed to prevent application crashes
-  // Lazy initialize the client only when needed to prevent application crashes
-  function getGenAI(req: express.Request): GoogleGenAI {
-    const key = req.headers["x-gemini-api-key"] || process.env.GEMINI_API_KEY;
-    if (!key) {
-      throw new Error("GEMINI_API_KEY_MISSING");
-    }
-    return new GoogleGenAI({
-      apiKey: key as string,
-      httpOptions: {
-        headers: {
-          "x-goog-api-key": key as string,
-          "User-Agent": "aistudio-build",
-        },
-      },
-    });
-  }
 
   // Pronunciation analyzer route using Gemini
   app.post("/api/analyze-pronunciation", async (req, res) => {
@@ -51,43 +32,31 @@ async function startServer() {
         });
       }
 
-      const ai = getGenAI(req);
-
-      const systemInstruction = `Eres un entrenador de pronunciación en inglés experto y de gran apoyo, especializado en enseñar a personas de habla hispana cómo dominar la entonación y pronunciación de verbos en inglés en distintos tiempos verbales.
-Compararás la frase esperada en inglés (expectedText) con la transcripción de voz lograda por el micrófono del usuario (transcribedText).
-Calcularás una puntuación de precisión (accuracyScore) entre 0 y 100 evaluando qué tan cercanas e inteligibles son las palabras.
-Si hay discrepancias relevantes de tiempo verbal (por ejemplo, el usuario omitió la finalización dental '-ed' en un pasado de verbo regular como 'worked' pronunciándolo erróneamente solo como 'work', o confundió un gerundio 'working'), marca matched=false para esa palabra, describe detalladamente la diferencia fonológica en 'feedback', y brinda consejos prácticos claros y estimulantes de fonética en español.
-Proporciona en 'phoneticGuide' una representación simplificada o aproximación a la fonética IPA que un hispanohablante pueda comprender con facilidad, de modo de asistir al usuario en sus intentos futuros.
-Mantén comentarios breves en español para cada palabra en 'details'. Sé proactivo, amable, educativo y motivador.`;
-
-      const prompt = `Frase modelo esperada a pronunciar: "${expectedText}"
-Frase real transcrita del usuario: "${transcribedText}"
-
-Analiza la precisión de la pronunciación de cada palabra. Si el texto transcrito está completamente vacío, devuelve un puntaje de 0 e indica amigablemente al participante que repita la frase con micrófono activador encendido.`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
 
       const responseSchema = {
-        type: Type.OBJECT,
+        type: "OBJECT",
         properties: {
           accuracyScore: {
-            type: Type.INTEGER,
+            type: "INTEGER",
             description: "Puntuación general de precisión en la pronunciación (0 a 100).",
           },
           feedback: {
-            type: Type.STRING,
+            type: "STRING",
             description: "Análisis explicativo sobre la pronunciación del participante, con recomendaciones fonéticas específicas en español.",
           },
           phoneticGuide: {
-            type: Type.STRING,
+            type: "STRING",
             description: "Guía de pronunciación fonética aproximada o IPA útil para hispanos, ej: /aɪ wɜːrkt/.",
           },
           details: {
-            type: Type.ARRAY,
+            type: "ARRAY",
             items: {
-              type: Type.OBJECT,
+              type: "OBJECT",
               properties: {
-                word: { type: Type.STRING, description: "Palabra limpia esperada de la oración modelo." },
-                matched: { type: Type.BOOLEAN, description: "Si la palabra del usuario coincidió o se aproximó con éxito." },
-                comment: { type: Type.STRING, description: "Feedback u opinión corta en español sobre la palabra, o vacío si fue excelente." },
+                word: { type: "STRING", description: "Palabra limpia esperada de la oración modelo." },
+                matched: { type: "BOOLEAN", description: "Si la palabra del usuario coincidió o se aproximó con éxito." },
+                comment: { type: "STRING", description: "Feedback u opinión corta en español sobre la palabra, o vacío si fue excelente." },
               },
               required: ["word", "matched"],
             },
@@ -97,18 +66,27 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
         required: ["accuracyScore", "feedback", "phoneticGuide", "details"],
       };
 
-      const result = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-        config: {
-          systemInstruction,
-          responseMimeType: "application/json",
-          responseSchema,
-          temperature: 0.15,
-        },
+      const result = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemInstruction }] },
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.15,
+            responseMimeType: "application/json",
+            responseSchema,
+          }
+        })
       });
 
-      const responseText = result.text;
+      if (!result.ok) {
+        const errText = await result.text();
+        throw new Error(`Status ${result.status}: ${errText}`);
+      }
+
+      const data = await result.json();
+      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!responseText) {
         throw new Error("No se obtuvo texto de respuesta de la IA.");
       }
@@ -152,24 +130,30 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
         });
       }
 
-      const ai = new GoogleGenAI({
-        apiKey: apiKey as string,
-        httpOptions: { headers: { "User-Agent": "aistudio-build" } },
-      });
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-flash-tts-preview",
-        contents: [{ parts: [{ text: text }] }],
-        config: {
-          responseModalities: ["AUDIO"],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: voiceName || "Kore" },
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent?key=${apiKey}`;
+      const result = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: text }] }],
+          generationConfig: {
+            responseModalities: ["AUDIO"],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: voiceName || "Kore" },
+              },
             },
-          },
-        },
+          }
+        })
       });
 
-      const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      if (!result.ok) {
+        const errText = await result.text();
+        throw new Error(`Status ${result.status}: ${errText}`);
+      }
+
+      const data = await result.json();
+      const base64Audio = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
       if (!base64Audio) {
         throw new Error("La IA no generó los datos de audio.");
       }
@@ -657,25 +641,25 @@ Dificultad preferida (si se proporcionó): "${difficulty || 'auto'}".
 Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, they) entre las 12 oraciones para que la práctica sea dinámica y abarque todos los pronombres.`;
 
       const responseSchema = {
-        type: Type.OBJECT,
+        type: "OBJECT",
         properties: {
-          verbEN: { type: Type.STRING, description: "La forma base en inglés del verbo/palabra de entrada. Ej: 'Speak' o 'To speak'." },
-          verbES: { type: Type.STRING, description: "La traducción de la forma base al español. Ej: 'Hablar'." },
-          difficulty: { type: Type.STRING, description: "La dificultad determinada: 'Básico', 'Intermedio' o 'Avanzado'." },
+          verbEN: { type: "STRING", description: "La forma base en inglés del verbo/palabra de entrada. Ej: 'Speak' o 'To speak'." },
+          verbES: { type: "STRING", description: "La traducción de la forma base al español. Ej: 'Hablar'." },
+          difficulty: { type: "STRING", description: "La dificultad determinada: 'Básico', 'Intermedio' o 'Avanzado'." },
           sentences: {
-            type: Type.ARRAY,
+            type: "ARRAY",
             items: {
-              type: Type.OBJECT,
+              type: "OBJECT",
               properties: {
                 tenseId: { 
-                  type: Type.STRING, 
-                  description: "Identificador único de tiempo verbal en minúsculas con guiones. Ej: 'simple-present', 'present-continuous', 'simple-past', 'past-continuous', 'present-perfect', 'present-perfect-continuous', 'past-perfect', 'past-perfect-continuous', 'simple-future', 'future-continuous', 'future-perfect', 'future-perfect-continuous'." 
+                  type: "STRING", 
+                  description: "Identificador único de tiempo verbal en minúsculas con guiones." 
                 },
-                tenseNameEN: { type: Type.STRING, description: "Nombre del tiempo verbal en inglés en mayúsculas, ej: 'PRESENT PERFECT'." },
-                tenseNameES: { type: Type.STRING, description: "Nombre del tiempo verbal en español, ej: 'Presente Perfecto'." },
-                sentence: { type: Type.STRING, description: "La oración completa en inglés usando el sujeto asignado de forma variada (I, you, he, she, we, they). Ej: 'He has worked'." },
-                translation: { type: Type.STRING, description: "Traducción exacta de la oración al español." },
-                pronunciationTip: { type: Type.STRING, description: "Un consejo práctico de pronunciación fonética simplificada en español específico para la pronunciación de este verbo en este tiempo verbal." }
+                tenseNameEN: { type: "STRING", description: "Nombre del tiempo verbal en inglés en mayúsculas." },
+                tenseNameES: { type: "STRING", description: "Nombre del tiempo verbal en español." },
+                sentence: { type: "STRING", description: "La oración completa en inglés." },
+                translation: { type: "STRING", description: "Traducción exacta de la oración al español." },
+                pronunciationTip: { type: "STRING", description: "Un consejo práctico de pronunciación fonética simplificada en español." }
               },
               required: ["tenseId", "tenseNameEN", "tenseNameES", "sentence", "translation", "pronunciationTip"],
             },
@@ -685,18 +669,28 @@ Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, the
         required: ["verbEN", "verbES", "difficulty", "sentences"]
       };
 
-      const result = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-        config: {
-          systemInstruction,
-          responseMimeType: "application/json",
-          responseSchema,
-          temperature: 0.2,
-        }
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+      const result = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemInstruction }] },
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            responseMimeType: "application/json",
+            responseSchema,
+          }
+        })
       });
 
-      const responseText = result.text;
+      if (!result.ok) {
+        const errText = await result.text();
+        throw new Error(`Status ${result.status}: ${errText}`);
+      }
+
+      const data = await result.json();
+      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!responseText) {
         throw new Error("No se obtuvo respuesta del generador de oraciones.");
       }

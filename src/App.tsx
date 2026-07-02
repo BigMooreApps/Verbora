@@ -353,32 +353,44 @@ function conjugateSpanishFuture(verbES: string, subject: string): string {
 
 function convertSpanishFromYoToSubject(translation: string, tenseId: string, verbES: string, subject: string): string {
   if (tenseId === "simple-present" || tenseId === "simple-past" || tenseId === "simple-future") {
-    const matchReflexive = /^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+(me|te|se|nos)\s+([a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)(.*)/i;
-    const matchNormal = /^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+([a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)(.*)/i;
+    const matchReflexive = /^([¡¿]?)\s*(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+(me|te|se|nos)\s+([a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)(.*)/i;
+    const matchNormal = /^([¡¿]?)\s*(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+([a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)(.*)/i;
     
     const conjugateFn = tenseId === "simple-present" ? conjugateSpanishPresent : tenseId === "simple-past" ? conjugateSpanishPast : conjugateSpanishFuture;
     const newVerb = conjugateFn(verbES, subject);
     
     if (matchReflexive.test(translation)) {
       const targetReflexive = subject === "Yo" ? "me" : subject === "Tú" ? "te" : subject === "Nosotros" ? "nos" : "se";
-      return translation.replace(matchReflexive, (_, p, ref, v, rest) => `${subject} ${targetReflexive} ${newVerb}${rest}`);
+      return translation.replace(matchReflexive, (_, prep, p, ref, v, rest) => `${prep}${subject} ${targetReflexive} ${newVerb}${rest}`);
     } else if (matchNormal.test(translation)) {
-      return translation.replace(matchNormal, (_, p, v, rest) => `${subject} ${newVerb}${rest}`);
+      return translation.replace(matchNormal, (_, prep, p, v, rest) => `${prep}${subject} ${newVerb}${rest}`);
     }
   }
 
   let t = translation;
-  const matchPronouns = /^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+/i;
+  const matchPronouns = /^([¡¿]?)\s*(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+/i;
   
   if (!matchPronouns.test(t)) {
-    const firstChar = t.charAt(0);
-    if (/[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]/.test(firstChar)) {
-      t = `${subject} ${firstChar.toLowerCase()}${t.slice(1)}`;
+    const hasStartPunct = /^[¡¿]/.test(t);
+    if (hasStartPunct) {
+      const punct = t.charAt(0);
+      const restOfText = t.slice(1).trim();
+      const firstChar = restOfText.charAt(0);
+      if (/[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]/.test(firstChar)) {
+        t = `${punct}${subject} ${firstChar.toLowerCase()}${restOfText.slice(1)}`;
+      } else {
+        t = `${punct}${subject} ${restOfText}`;
+      }
     } else {
-      t = `${subject} ${t}`;
+      const firstChar = t.charAt(0);
+      if (/[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]/.test(firstChar)) {
+        t = `${subject} ${firstChar.toLowerCase()}${t.slice(1)}`;
+      } else {
+        t = `${subject} ${t}`;
+      }
     }
   } else {
-    t = t.replace(matchPronouns, `${subject} `);
+    t = t.replace(matchPronouns, (_, punct, p) => `${punct}${subject} `);
   }
   
   if (subject === "Tú") {

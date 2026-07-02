@@ -353,8 +353,8 @@ function conjugateSpanishFuture(verbES: string, subject: string): string {
 
 function convertSpanishFromYoToSubject(translation: string, tenseId: string, verbES: string, subject: string): string {
   if (tenseId === "simple-present" || tenseId === "simple-past" || tenseId === "simple-future") {
-    const matchReflexive = /^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+(me|te|se|nos)\s+(\w+)(.*)/i;
-    const matchNormal = /^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+(\w+)(.*)/i;
+    const matchReflexive = /^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+(me|te|se|nos)\s+([a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)(.*)/i;
+    const matchNormal = /^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+([a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)(.*)/i;
     
     const conjugateFn = tenseId === "simple-present" ? conjugateSpanishPresent : tenseId === "simple-past" ? conjugateSpanishPast : conjugateSpanishFuture;
     const newVerb = conjugateFn(verbES, subject);
@@ -372,7 +372,7 @@ function convertSpanishFromYoToSubject(translation: string, tenseId: string, ver
   
   if (!matchPronouns.test(t)) {
     const firstChar = t.charAt(0);
-    if (/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(firstChar)) {
+    if (/[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]/.test(firstChar)) {
       t = `${subject} ${firstChar.toLowerCase()}${t.slice(1)}`;
     } else {
       t = `${subject} ${t}`;
@@ -390,7 +390,7 @@ function convertSpanishFromYoToSubject(translation: string, tenseId: string, ver
     t = t.replace(/(^|\s)(habr[eé]|habr[aá]s|habr[aá]|habremos|habr[aá]n)(\s|$)/gi, "$1habrás$3");
     t = t.replace(/(^|\s)(estar[ií]a|estar[ií]as|estar[ií]amos|estar[ií]an)(\s|$)/gi, "$1estarías$3");
     t = t.replace(/(^|\s)(habr[ií]a|habr[ií]as|habr[ií]amos|habr[ií]an)(\s|$)/gi, "$1habrías$3");
-    t = t.replace(/(^|\s)(\w+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}s${s2}`);
+    t = t.replace(/(^|\s)([a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}s${s2}`);
   } else if (subject === "Él" || subject === "Ella") {
     t = t.replace(/(^|\s)(estoy|est[aá]s|est[aá]|estamos|est[aá]n)(\s|$)/gi, `$1está$3`);
     t = t.replace(/(^|\s)(estaba|estabas|est[aá]bamos|estaban)(\s|$)/gi, `$1estaba$3`);
@@ -400,7 +400,7 @@ function convertSpanishFromYoToSubject(translation: string, tenseId: string, ver
     t = t.replace(/(^|\s)(habr[eé]|habr[aá]s|habr[aá]|habremos|habr[aá]n)(\s|$)/gi, `$1habrá$3`);
     t = t.replace(/(^|\s)(estar[ií]a|estar[ií]as|estar[ií]amos|estar[ií]an)(\s|$)/gi, `$1estaría$3`);
     t = t.replace(/(^|\s)(habr[ií]a|habr[ií]as|habr[ií]amos|habr[ií]an)(\s|$)/gi, `$1habría$3`);
-    t = t.replace(/(^|\s)(\w+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}${s2}`);
+    t = t.replace(/(^|\s)([a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}${s2}`);
   } else if (subject === "Nosotros") {
     t = t.replace(/(^|\s)(estoy|est[aá]s|est[aá]|estamos|est[aá]n)(\s|$)/gi, "$1estamos$3");
     t = t.replace(/(^|\s)(estaba|estabas|est[aá]bamos|estaban)(\s|$)/gi, "$1estábamos$3");
@@ -410,7 +410,7 @@ function convertSpanishFromYoToSubject(translation: string, tenseId: string, ver
     t = t.replace(/(^|\s)(habr[eé]|habr[aá]s|habr[aá]|habremos|habr[aá]n)(\s|$)/gi, "$1habremos$3");
     t = t.replace(/(^|\s)(estar[ií]a|estar[ií]as|estar[ií]amos|estar[ií]an)(\s|$)/gi, "$1estaríamos$3");
     t = t.replace(/(^|\s)(habr[ií]a|habr[ií]as|habr[ií]amos|habr[ií]an)(\s|$)/gi, "$1habríamos$3");
-    t = t.replace(/(^|\s)(\w+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}mos${s2}`);
+    t = t.replace(/(^|\s)([a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}mos${s2}`);
   } else if (subject === "Ellos" || subject === "Ellas") {
     t = t.replace(/(^|\s)(estoy|est[aá]s|est[aá]|estamos|est[aá]n)(\s|$)/gi, `$1están$3`);
     t = t.replace(/(^|\s)(estaba|estabas|est[aá]bamos|estaban)(\s|$)/gi, `$1estaban$3`);
@@ -420,7 +420,7 @@ function convertSpanishFromYoToSubject(translation: string, tenseId: string, ver
     t = t.replace(/(^|\s)(habr[eé]|habr[aá]s|habr[aá]|habremos|habr[aá]n)(\s|$)/gi, `$1habrán$3`);
     t = t.replace(/(^|\s)(estar[ií]a|estar[ií]as|estar[ií]amos|estar[ií]an)(\s|$)/gi, `$1estarían$3`);
     t = t.replace(/(^|\s)(habr[ií]a|habr[ií]as|habr[ií]amos|habr[ií]an)(\s|$)/gi, `$1habrían$3`);
-    t = t.replace(/(^|\s)(\w+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}n${s2}`);
+    t = t.replace(/(^|\s)([a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}n${s2}`);
   } else if (subject === "Yo") {
     t = t.replace(/(^|\s)(estoy|est[aá]s|est[aá]|estamos|est[aá]n)(\s|$)/gi, "$1estoy$3");
     t = t.replace(/(^|\s)(estaba|estabas|est[aá]bamos|estaban)(\s|$)/gi, "$1estaba$3");
@@ -430,7 +430,7 @@ function convertSpanishFromYoToSubject(translation: string, tenseId: string, ver
     t = t.replace(/(^|\s)(habr[eé]|habr[aá]s|habr[aá]|habremos|habr[aá]n)(\s|$)/gi, "$1habré$3");
     t = t.replace(/(^|\s)(estar[ií]a|estar[ií]as|estar[ií]amos|estar[ií]an)(\s|$)/gi, "$1estaría$3");
     t = t.replace(/(^|\s)(habr[ií]a|habr[ií]as|habr[ií]amos|habr[ií]an)(\s|$)/gi, "$1habría$3");
-    t = t.replace(/(^|\s)(\w+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}${s2}`);
+    t = t.replace(/(^|\s)([a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}${s2}`);
   }
 
   return t;

@@ -1211,37 +1211,6 @@ export default function App() {
           id="workout-card"
         >
           
-          {/* Tense Badge & Navigation row */}
-          {activeVerb.sentences.length > 1 ? (
-            <div className="flex items-center justify-between shrink-0" id="card-navigation-row">
-              <button 
-                onClick={handlePrevTense} 
-                className="p-1.5 px-2.5 text-white/40 hover:text-teal-400 hover:bg-white/5 rounded-xl transition-colors cursor-pointer"
-                title="Tiempo verbal anterior"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
- 
-              <span className="px-4 py-1.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] sm:text-xs font-bold uppercase tracking-widest border border-teal-500/30 text-center">
-                {activeSentence.tenseNameES}
-              </span>
- 
-              <button 
-                onClick={handleNextTense}
-                className="p-1.5 px-2.5 text-white/40 hover:text-teal-400 hover:bg-white/5 rounded-xl transition-colors cursor-pointer"
-                title="Tiempo verbal siguiente"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex justify-center shrink-0" id="card-navigation-row">
-              <span className="px-4 py-1.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] sm:text-xs font-bold uppercase tracking-widest border border-teal-500/30 text-center">
-                {activeSentence.tenseNameES}
-              </span>
-            </div>
-          )}
-
           <div className="relative flex-1 flex flex-col min-h-0 w-full overflow-hidden mt-3 sm:mt-6">
             <AnimatePresence mode="wait" custom={slideDirection}>
               <motion.div
@@ -1395,6 +1364,37 @@ export default function App() {
               </motion.div>
             </AnimatePresence>
           </div>
+
+          {/* Tense Badge & Navigation row (Moved to bottom) */}
+          {activeVerb.sentences.length > 1 ? (
+            <div className="flex items-center justify-between shrink-0 mt-3 pt-3 border-t border-white/10" id="card-navigation-row">
+              <button 
+                onClick={handlePrevTense} 
+                className="p-1.5 px-2.5 text-white/40 hover:text-teal-400 hover:bg-white/5 rounded-xl transition-colors cursor-pointer"
+                title="Tiempo verbal anterior"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+ 
+              <span className="px-4 py-1.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] sm:text-xs font-bold uppercase tracking-widest border border-teal-500/30 text-center">
+                {activeSentence.tenseNameES}
+              </span>
+ 
+              <button 
+                onClick={handleNextTense}
+                className="p-1.5 px-2.5 text-white/40 hover:text-teal-400 hover:bg-white/5 rounded-xl transition-colors cursor-pointer"
+                title="Tiempo verbal siguiente"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex justify-center shrink-0 mt-3 pt-3 border-t border-white/10" id="card-navigation-row">
+              <span className="px-4 py-1.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] sm:text-xs font-bold uppercase tracking-widest border border-teal-500/30 text-center">
+                {activeSentence.tenseNameES}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* FLOATING ACTION RECORD ROW */}

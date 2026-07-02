@@ -40,18 +40,7 @@ export function VerbSelector({
 
   const selectedVerb = exercises.find((item) => item.id === selectedVerbId) || exercises[0];
 
-  const getDifficultyStyles = (diff: string) => {
-    switch (diff) {
-      case "Básico":
-        return "bg-teal-500/10 text-teal-300 border-teal-500/20";
-      case "Intermedio":
-        return "bg-blue-500/10 text-blue-300 border-blue-500/20";
-      case "Avanzado":
-        return "bg-rose-500/10 text-rose-300 border-rose-500/20";
-      default:
-        return "bg-white/5 text-white/60 border-white/10";
-    }
-  };
+
 
   const capitalize = (s: string) => {
     const trimmed = s.trim();
@@ -138,8 +127,7 @@ export function VerbSelector({
     const query = searchQuery.toLowerCase();
     return (
       item.verbEN.toLowerCase().includes(query) ||
-      item.verbES.toLowerCase().includes(query) ||
-      item.difficulty.toLowerCase().includes(query)
+      item.verbES.toLowerCase().includes(query)
     );
   });
 
@@ -223,7 +211,7 @@ export function VerbSelector({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar verbo o dificultad..."
+                  placeholder="Buscar palabra..."
                   className="w-full bg-transparent text-xs text-white placeholder-white/30 focus:outline-none py-1"
                 />
                 {searchQuery && (
@@ -313,9 +301,6 @@ export function VerbSelector({
 
                         {/* Right Actions */}
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${getDifficultyStyles(item.difficulty)}`}>
-                            {item.difficulty}
-                          </span>
                           
                           {item.isCustom && (
                             <button

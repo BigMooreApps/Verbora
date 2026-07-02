@@ -142,15 +142,19 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
         return res.status(400).json({ error: "BAD_REQUEST", message: "Falta el texto a sintetizar." });
       }
 
-      const apiKey = req.headers["x-gemini-api-key"] || process.env.GEMINI_API_KEY;
+      // Strict requirement: Only user's frontend API key is allowed for TTS to prevent server quota exhaustion
+      const apiKey = req.headers["x-gemini-api-key"];
       if (!apiKey) {
-        return res.status(500).json({
+        return res.status(400).json({
           error: "GEMINI_API_KEY_MISSING",
-          message: "Para usar voces de IA ultra-reales, por favor configura tu clave API de Gemini.",
+          message: "Para usar las Voces Premium, por favor configura tu API Key de Gemini en el ícono de la llave de la aplicación.",
         });
       }
 
-      const ai = getGenAI(req);
+      const ai = new GoogleGenAI({
+        apiKey: apiKey as string,
+        httpOptions: { headers: { "User-Agent": "aistudio-build" } },
+      });
       const response = await ai.models.generateContent({
         model: "gemini-3.1-flash-tts-preview",
         contents: [{ parts: [{ text: text }] }],

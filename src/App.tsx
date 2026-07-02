@@ -514,6 +514,12 @@ export default function App() {
     const isGeminiVoice = selectedVoiceName.startsWith("gemini-");
 
     if (isGeminiVoice) {
+      if (!userApiKey) {
+        setIsApiKeyModalOpen(true);
+        fallbackSpeechSynthesis(text);
+        return;
+      }
+
       if (isGeminiQuotaExhausted) {
         fallbackSpeechSynthesis(text);
         return;

@@ -32,7 +32,7 @@ async function startServer() {
         });
       }
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent`;
 
       const responseSchema = {
         type: "OBJECT",
@@ -68,7 +68,10 @@ async function startServer() {
 
       const result = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-goog-api-key": (apiKey as string).trim()
+        },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: systemInstruction }] },
           contents: [{ parts: [{ text: prompt }] }],
@@ -130,10 +133,13 @@ async function startServer() {
         });
       }
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent?key=${apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent`;
       const result = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-goog-api-key": (apiKey as string).trim()
+        },
         body: JSON.stringify({
           contents: [{ parts: [{ text: text }] }],
           generationConfig: {
@@ -667,10 +673,13 @@ Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, the
         required: ["verbEN", "verbES", "difficulty", "sentences"]
       };
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent`;
       const result = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-goog-api-key": (apiKey as string).trim()
+        },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: systemInstruction }] },
           contents: [{ parts: [{ text: prompt }] }],

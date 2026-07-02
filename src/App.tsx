@@ -1196,10 +1196,6 @@ export default function App() {
           </span>
         </div>
  
-        {/* STATS ANALYTICS DASHBOARD */}
-        <div className="hidden sm:block">
-          <StatsDashboard stats={stats} />
-        </div>
 
         {/* MODAL PARA CONFIGURACIÓN DE VOZ */}
         <AnimatePresence>

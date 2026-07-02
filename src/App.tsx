@@ -230,36 +230,42 @@ function convertEnglishFromIToSubject(sentence: string, tenseId: string, verbEN:
 function conjugateSpanishPresent(verbES: string, subject: string): string {
   const v = verbES.toLowerCase().replace(/^(a|to)\s+/i, "").trim();
   if (v === "ir") {
+    if (subject === "Yo") return "voy";
     if (subject === "Tú") return "vas";
     if (subject === "Él" || subject === "Ella") return "va";
     if (subject === "Nosotros") return "vamos";
     return "van";
   }
   if (v === "ser") {
+    if (subject === "Yo") return "soy";
     if (subject === "Tú") return "eres";
     if (subject === "Él" || subject === "Ella") return "es";
     if (subject === "Nosotros") return "somos";
     return "son";
   }
   if (v === "estar") {
+    if (subject === "Yo") return "estoy";
     if (subject === "Tú") return "estás";
     if (subject === "Él" || subject === "Ella") return "está";
     if (subject === "Nosotros") return "estamos";
     return "están";
   }
   if (v === "hacer") {
+    if (subject === "Yo") return "hago";
     if (subject === "Tú") return "haces";
     if (subject === "Él" || subject === "Ella") return "hace";
     if (subject === "Nosotros") return "hacemos";
     return "hacen";
   }
   if (v === "decir") {
+    if (subject === "Yo") return "digo";
     if (subject === "Tú") return "dices";
     if (subject === "Él" || subject === "Ella") return "dice";
     if (subject === "Nosotros") return "decimos";
     return "dicen";
   }
   if (v === "tener") {
+    if (subject === "Yo") return "tengo";
     if (subject === "Tú") return "tienes";
     if (subject === "Él" || subject === "Ella") return "tiene";
     if (subject === "Nosotros") return "tenemos";
@@ -270,6 +276,7 @@ function conjugateSpanishPresent(verbES: string, subject: string): string {
   const isAr = v.endsWith("ar");
   const isEr = v.endsWith("er");
   
+  if (subject === "Yo") return root + "o";
   if (subject === "Tú") return root + (isAr ? "as" : "es");
   if (subject === "Él" || subject === "Ella") return root + (isAr ? "a" : "e");
   if (subject === "Nosotros") return root + (isAr ? "amos" : isEr ? "emos" : "imos");
@@ -279,30 +286,35 @@ function conjugateSpanishPresent(verbES: string, subject: string): string {
 function conjugateSpanishPast(verbES: string, subject: string): string {
   const v = verbES.toLowerCase().replace(/^(a|to)\s+/i, "").trim();
   if (v === "ir" || v === "ser") {
+    if (subject === "Yo") return "fui";
     if (subject === "Tú") return "fuiste";
     if (subject === "Él" || subject === "Ella") return "fue";
     if (subject === "Nosotros") return "fuimos";
     return "fueron";
   }
   if (v === "hacer") {
+    if (subject === "Yo") return "hice";
     if (subject === "Tú") return "hiciste";
     if (subject === "Él" || subject === "Ella") return "hizo";
     if (subject === "Nosotros") return "hicimos";
     return "hicieron";
   }
   if (v === "decir") {
+    if (subject === "Yo") return "dije";
     if (subject === "Tú") return "dijiste";
     if (subject === "Él" || subject === "Ella") return "dijo";
     if (subject === "Nosotros") return "dijimos";
     return "dijeron";
   }
   if (v === "tener") {
+    if (subject === "Yo") return "tuve";
     if (subject === "Tú") return "tuviste";
     if (subject === "Él" || subject === "Ella") return "tuvo";
     if (subject === "Nosotros") return "tuvimos";
     return "tuvieron";
   }
   if (v === "estar") {
+    if (subject === "Yo") return "estuve";
     if (subject === "Tú") return "estuviste";
     if (subject === "Él" || subject === "Ella") return "estuvo";
     if (subject === "Nosotros") return "estuvimos";
@@ -312,6 +324,7 @@ function conjugateSpanishPast(verbES: string, subject: string): string {
   const root = v.replace(/(ar|er|ir)$/i, "");
   const isAr = v.endsWith("ar");
   
+  if (subject === "Yo") return root + (isAr ? "é" : "í");
   if (subject === "Tú") return root + (isAr ? "aste" : "iste");
   if (subject === "Él" || subject === "Ella") return root + (isAr ? "ó" : "ió");
   if (subject === "Nosotros") return root + (isAr ? "amos" : "imos");
@@ -331,6 +344,7 @@ function conjugateSpanishFuture(verbES: string, subject: string): string {
   else if (v === "saber") stem = "sabr";
   else if (v === "querer") stem = "querr";
 
+  if (subject === "Yo") return stem + "é";
   if (subject === "Tú") return stem + "ás";
   if (subject === "Él" || subject === "Ella") return stem + "á";
   if (subject === "Nosotros") return stem + "emos";
@@ -338,70 +352,85 @@ function conjugateSpanishFuture(verbES: string, subject: string): string {
 }
 
 function convertSpanishFromYoToSubject(translation: string, tenseId: string, verbES: string, subject: string): string {
-  if (tenseId === "simple-present") {
-    const rest = translation.replace(/^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+\w+/i, "").trim();
-    return `${subject} ${conjugateSpanishPresent(verbES, subject)}${rest ? " " + rest : ""}`;
-  }
-  if (tenseId === "simple-past") {
-    const rest = translation.replace(/^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+\w+/i, "").trim();
-    return `${subject} ${conjugateSpanishPast(verbES, subject)}${rest ? " " + rest : ""}`;
-  }
-  if (tenseId === "simple-future") {
-    const rest = translation.replace(/^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+\w+/i, "").trim();
-    return `${subject} ${conjugateSpanishFuture(verbES, subject)}${rest ? " " + rest : ""}`;
+  if (tenseId === "simple-present" || tenseId === "simple-past" || tenseId === "simple-future") {
+    const matchReflexive = /^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+(me|te|se|nos)\s+(\w+)(.*)/i;
+    const matchNormal = /^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+(\w+)(.*)/i;
+    
+    const conjugateFn = tenseId === "simple-present" ? conjugateSpanishPresent : tenseId === "simple-past" ? conjugateSpanishPast : conjugateSpanishFuture;
+    const newVerb = conjugateFn(verbES, subject);
+    
+    if (matchReflexive.test(translation)) {
+      const targetReflexive = subject === "Yo" ? "me" : subject === "Tú" ? "te" : subject === "Nosotros" ? "nos" : "se";
+      return translation.replace(matchReflexive, (_, p, ref, v, rest) => `${subject} ${targetReflexive} ${newVerb}${rest}`);
+    } else if (matchNormal.test(translation)) {
+      return translation.replace(matchNormal, (_, p, v, rest) => `${subject} ${newVerb}${rest}`);
+    }
   }
 
   let t = translation;
   const matchPronouns = /^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+/i;
   
+  if (!matchPronouns.test(t)) {
+    const firstChar = t.charAt(0);
+    if (/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(firstChar)) {
+      t = `${subject} ${firstChar.toLowerCase()}${t.slice(1)}`;
+    } else {
+      t = `${subject} ${t}`;
+    }
+  } else {
+    t = t.replace(matchPronouns, `${subject} `);
+  }
+  
   if (subject === "Tú") {
-    t = t.replace(matchPronouns, "Tú ");
-    t = t.replace(/(^|\s)(estoy|está|estamos|están)(\s|$)/gi, "$1estás$3");
+    t = t.replace(/(^|\s)(estoy|est[aá]s|est[aá]|estamos|est[aá]n)(\s|$)/gi, "$1estás$3");
     t = t.replace(/(^|\s)(estaba|estábamos|estaban)(\s|$)/gi, "$1estabas$3");
     t = t.replace(/(^|\s)(he|ha|hemos|han)(\s|$)/gi, "$1has$3");
-    t = t.replace(/(^|\s)(había|habíamos|habían)(\s|$)/gi, "$1habías$3");
-    t = t.replace(/(^|\s)(estaré|estará|estaremos|estarán)(\s|$)/gi, "$1estarás$3");
-    t = t.replace(/(^|\s)(habré|habrá|habremos|habrán)(\s|$)/gi, "$1habrás$3");
-    t = t.replace(/(^|\s)(estaría|estaríamos|estarían)(\s|$)/gi, "$1estarías$3");
-    t = t.replace(/(^|\s)(\w+)(aría|ería|iría)(\s|$)/gi, "$1$2$3s$4");
+    t = t.replace(/(^|\s)(hab[ií]a|hab[ií]as|hab[ií]amos|hab[ií]an)(\s|$)/gi, "$1habías$3");
+    t = t.replace(/(^|\s)(estar[eé]|estar[aá]s|estar[aá]|estaremos|estar[aá]n)(\s|$)/gi, "$1estarás$3");
+    t = t.replace(/(^|\s)(habr[eé]|habr[aá]s|habr[aá]|habremos|habr[aá]n)(\s|$)/gi, "$1habrás$3");
+    t = t.replace(/(^|\s)(estar[ií]a|estar[ií]as|estar[ií]amos|estar[ií]an)(\s|$)/gi, "$1estarías$3");
+    t = t.replace(/(^|\s)(habr[ií]a|habr[ií]as|habr[ií]amos|habr[ií]an)(\s|$)/gi, "$1habrías$3");
+    t = t.replace(/(^|\s)(\w+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}s${s2}`);
   } else if (subject === "Él" || subject === "Ella") {
-    t = t.replace(matchPronouns, `${subject} `);
-    t = t.replace(/(^|\s)(estoy|estás|estamos|están)(\s|$)/gi, "$1está$3");
-    t = t.replace(/(^|\s)(estaba|estabas|estábamos|estaban)(\s|$)/gi, "$1estaba$3");
-    t = t.replace(/(^|\s)(he|has|hemos|han)(\s|$)/gi, "$1ha$3");
-    t = t.replace(/(^|\s)(había|habías|habíamos|habían)(\s|$)/gi, "$1había$3");
-    t = t.replace(/(^|\s)(estaré|estarás|estaremos|estarán)(\s|$)/gi, "$1estará$3");
-    t = t.replace(/(^|\s)(habré|habrás|habremos|habrán)(\s|$)/gi, "$1habrá$3");
-    t = t.replace(/(^|\s)(estaría|estarías|estaríamos|estarían)(\s|$)/gi, "$1estaría$3");
+    t = t.replace(/(^|\s)(estoy|est[aá]s|est[aá]|estamos|est[aá]n)(\s|$)/gi, `$1está$3`);
+    t = t.replace(/(^|\s)(estaba|estabas|est[aá]bamos|estaban)(\s|$)/gi, `$1estaba$3`);
+    t = t.replace(/(^|\s)(he|has|ha|hemos|han)(\s|$)/gi, `$1ha$3`);
+    t = t.replace(/(^|\s)(hab[ií]a|hab[ií]as|hab[ií]amos|hab[ií]an)(\s|$)/gi, `$1había$3`);
+    t = t.replace(/(^|\s)(estar[eé]|estar[aá]s|estar[aá]|estaremos|estar[aá]n)(\s|$)/gi, `$1estará$3`);
+    t = t.replace(/(^|\s)(habr[eé]|habr[aá]s|habr[aá]|habremos|habr[aá]n)(\s|$)/gi, `$1habrá$3`);
+    t = t.replace(/(^|\s)(estar[ií]a|estar[ií]as|estar[ií]amos|estar[ií]an)(\s|$)/gi, `$1estaría$3`);
+    t = t.replace(/(^|\s)(habr[ií]a|habr[ií]as|habr[ií]amos|habr[ií]an)(\s|$)/gi, `$1habría$3`);
+    t = t.replace(/(^|\s)(\w+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}${s2}`);
   } else if (subject === "Nosotros") {
-    t = t.replace(matchPronouns, "Nosotros ");
-    t = t.replace(/(^|\s)(estoy|estás|está|están)(\s|$)/gi, "$1estamos$3");
-    t = t.replace(/(^|\s)(estaba|estabas|estaban)(\s|$)/gi, "$1estábamos$3");
-    t = t.replace(/(^|\s)(he|has|ha|han)(\s|$)/gi, "$1hemos$3");
-    t = t.replace(/(^|\s)(había|habías|habían)(\s|$)/gi, "$1habíamos$3");
-    t = t.replace(/(^|\s)(estaré|estarás|estará|estarán)(\s|$)/gi, "$1estaremos$3");
-    t = t.replace(/(^|\s)(habré|habrás|habrá|habrán)(\s|$)/gi, "$1habremos$3");
-    t = t.replace(/(^|\s)(estaría|estarías|estarían)(\s|$)/gi, "$1estaríamos$3");
-    t = t.replace(/(^|\s)(\w+)(aría|ería|iría)(\s|$)/gi, "$1$2$3mos$4");
+    t = t.replace(/(^|\s)(estoy|est[aá]s|est[aá]|estamos|est[aá]n)(\s|$)/gi, "$1estamos$3");
+    t = t.replace(/(^|\s)(estaba|estabas|est[aá]bamos|estaban)(\s|$)/gi, "$1estábamos$3");
+    t = t.replace(/(^|\s)(he|has|ha|hemos|han)(\s|$)/gi, "$1hemos$3");
+    t = t.replace(/(^|\s)(hab[ií]a|hab[ií]as|hab[ií]amos|hab[ií]an)(\s|$)/gi, "$1habíamos$3");
+    t = t.replace(/(^|\s)(estar[eé]|estar[aá]s|estar[aá]|estaremos|estar[aá]n)(\s|$)/gi, "$1estaremos$3");
+    t = t.replace(/(^|\s)(habr[eé]|habr[aá]s|habr[aá]|habremos|habr[aá]n)(\s|$)/gi, "$1habremos$3");
+    t = t.replace(/(^|\s)(estar[ií]a|estar[ií]as|estar[ií]amos|estar[ií]an)(\s|$)/gi, "$1estaríamos$3");
+    t = t.replace(/(^|\s)(habr[ií]a|habr[ií]as|habr[ií]amos|habr[ií]an)(\s|$)/gi, "$1habríamos$3");
+    t = t.replace(/(^|\s)(\w+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}mos${s2}`);
   } else if (subject === "Ellos" || subject === "Ellas") {
-    t = t.replace(matchPronouns, `${subject} `);
-    t = t.replace(/(^|\s)(estoy|estás|está|estamos)(\s|$)/gi, "$1están$3");
-    t = t.replace(/(^|\s)(estaba|estabas|estaba|estábamos)(\s|$)/gi, "$1estaban$3");
-    t = t.replace(/(^|\s)(he|has|ha|hemos)(\s|$)/gi, "$1han$3");
-    t = t.replace(/(^|\s)(había|habías|había|habíamos)(\s|$)/gi, "$1habían$3");
-    t = t.replace(/(^|\s)(estaré|estarás|estará|estaremos)(\s|$)/gi, "$1estarán$3");
-    t = t.replace(/(^|\s)(habré|habrás|habrá|habremos)(\s|$)/gi, "$1habrán$3");
-    t = t.replace(/(^|\s)(estaría|estarías|estaría|estaríamos)(\s|$)/gi, "$1estarían$3");
-    t = t.replace(/(^|\s)(\w+)(aría|ería|iría)(\s|$)/gi, "$1$2$3n$4");
+    t = t.replace(/(^|\s)(estoy|est[aá]s|est[aá]|estamos|est[aá]n)(\s|$)/gi, `$1están$3`);
+    t = t.replace(/(^|\s)(estaba|estabas|est[aá]bamos|estaban)(\s|$)/gi, `$1estaban$3`);
+    t = t.replace(/(^|\s)(he|has|ha|hemos|han)(\s|$)/gi, `$1han$3`);
+    t = t.replace(/(^|\s)(hab[ií]a|hab[ií]as|hab[ií]amos|hab[ií]an)(\s|$)/gi, `$1habían$3`);
+    t = t.replace(/(^|\s)(estar[eé]|estar[aá]s|estar[aá]|estaremos|estar[aá]n)(\s|$)/gi, `$1estarán$3`);
+    t = t.replace(/(^|\s)(habr[eé]|habr[aá]s|habr[aá]|habremos|habr[aá]n)(\s|$)/gi, `$1habrán$3`);
+    t = t.replace(/(^|\s)(estar[ií]a|estar[ií]as|estar[ií]amos|estar[ií]an)(\s|$)/gi, `$1estarían$3`);
+    t = t.replace(/(^|\s)(habr[ií]a|habr[ií]as|habr[ií]amos|habr[ií]an)(\s|$)/gi, `$1habrían$3`);
+    t = t.replace(/(^|\s)(\w+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}n${s2}`);
   } else if (subject === "Yo") {
-    t = t.replace(matchPronouns, "Yo ");
-    t = t.replace(/(^|\s)(estás|está|estamos|están)(\s|$)/gi, "$1estoy$3");
-    t = t.replace(/(^|\s)(estabas|estaba|estábamos|estaban)(\s|$)/gi, "$1estaba$3");
-    t = t.replace(/(^|\s)(has|ha|hemos|han)(\s|$)/gi, "$1he$3");
-    t = t.replace(/(^|\s)(habías|había|habíamos|habían)(\s|$)/gi, "$1había$3");
-    t = t.replace(/(^|\s)(estarás|estará|estaremos|estarán)(\s|$)/gi, "$1estaré$3");
-    t = t.replace(/(^|\s)(habrás|habrá|habremos|habrán)(\s|$)/gi, "$1habré$3");
-    t = t.replace(/(^|\s)(estarías|estaría|estaríamos|estarían)(\s|$)/gi, "$1estaría$3");
+    t = t.replace(/(^|\s)(estoy|est[aá]s|est[aá]|estamos|est[aá]n)(\s|$)/gi, "$1estoy$3");
+    t = t.replace(/(^|\s)(estaba|estabas|est[aá]bamos|estaban)(\s|$)/gi, "$1estaba$3");
+    t = t.replace(/(^|\s)(he|has|ha|hemos|han)(\s|$)/gi, "$1he$3");
+    t = t.replace(/(^|\s)(hab[ií]a|hab[ií]as|hab[ií]amos|hab[ií]an)(\s|$)/gi, "$1había$3");
+    t = t.replace(/(^|\s)(estar[eé]|estar[aá]s|estar[aá]|estaremos|estar[aá]n)(\s|$)/gi, "$1estaré$3");
+    t = t.replace(/(^|\s)(habr[eé]|habr[aá]s|habr[aá]|habremos|habr[aá]n)(\s|$)/gi, "$1habré$3");
+    t = t.replace(/(^|\s)(estar[ií]a|estar[ií]as|estar[ií]amos|estar[ií]an)(\s|$)/gi, "$1estaría$3");
+    t = t.replace(/(^|\s)(habr[ií]a|habr[ií]as|habr[ií]amos|habr[ií]an)(\s|$)/gi, "$1habría$3");
+    t = t.replace(/(^|\s)(\w+)(ar[ií]a|er[ií]a|ir[ií]a)(\s|$)/gi, (_, s1, stem, end, s2) => `${s1}${stem}${end.replace(/i/i, "í")}${s2}`);
   }
 
   return t;

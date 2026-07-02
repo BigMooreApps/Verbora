@@ -32,7 +32,17 @@ async function startServer() {
         });
       }
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent`;
+      const systemInstruction = `Eres un entrenador de pronunciación en inglés experto y de gran apoyo, especializado en enseñar a personas de habla hispana cómo dominar la entonación y pronunciación de verbos en inglés en distintos tiempos verbales.
+Compararás la frase esperada en inglés (expectedText) con la transcripción de voz lograda por el micrófono del usuario (transcribedText).
+Calcularás una puntuación de precisión (accuracyScore) entre 0 y 100 evaluando qué tan cercanas e inteligibles son las palabras.
+Si hay discrepancias relevantes de tiempo verbal (por ejemplo, el usuario omitió la finalización dental '-ed' en un pasado de verbo regular como 'worked' pronunciándolo erróneamente solo como 'work', o confundió un gerundio 'working'), marca matched=false para esa palabra, describe detalladamente la diferencia fonológica en 'feedback', y brinda consejos prácticos claros y estimulantes de fonética en español.
+Proporciona en 'phoneticGuide' una representación simplificada o aproximación a la fonética IPA que un hispanohablante pueda comprender con facilidad, de modo de asistir al usuario en sus intentos futuros.
+Mantén comentarios breves en español para cada palabra en 'details'. Sé proactivo, amable, educativo y motivador.`;
+
+      const prompt = `Frase modelo esperada a pronunciar: "${expectedText}"
+Frase real transcrita del usuario: "${transcribedText}"
+
+Analiza la precisión de la pronunciación de cada palabra. Si el texto transcrito está completamente vacío, devuelve un puntaje de 0 e indica amigablemente al participante que repita la frase con micrófono activador encendido.`;
 
       const responseSchema = {
         type: "OBJECT",
@@ -66,11 +76,12 @@ async function startServer() {
         required: ["accuracyScore", "feedback", "phoneticGuide", "details"],
       };
 
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
       const result = await fetch(url, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "x-goog-api-key": (apiKey as string).trim()
+          "x-goog-api-key": (apiKey as string).trim(),
         },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: systemInstruction }] },
@@ -79,8 +90,8 @@ async function startServer() {
             temperature: 0.15,
             responseMimeType: "application/json",
             responseSchema,
-          }
-        })
+          },
+        }),
       });
 
       if (!result.ok) {
@@ -99,7 +110,7 @@ async function startServer() {
     } catch (error: any) {
       const errStr = String(error) + " " + JSON.stringify(error);
       const isQuota = errStr.includes("429") || errStr.includes("quota") || errStr.includes("RESOURCE_EXHAUSTED");
-      
+
       if (isQuota) {
         console.warn("Límite de cuota o de velocidad alcanzado en la evaluación:", error.message || error);
         return res.status(429).json({
@@ -115,6 +126,7 @@ async function startServer() {
       });
     }
   });
+
 
   // TTS Route using gemini-3.1-flash-tts-preview
   app.post("/api/generate-tts", async (req, res) => {
@@ -133,7 +145,7 @@ async function startServer() {
         });
       }
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent`;
       const result = await fetch(url, {
         method: "POST",
         headers: { 
@@ -673,7 +685,7 @@ Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, the
         required: ["verbEN", "verbES", "difficulty", "sentences"]
       };
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
       const result = await fetch(url, {
         method: "POST",
         headers: { 

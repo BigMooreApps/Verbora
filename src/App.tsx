@@ -825,6 +825,34 @@ export default function App() {
     handleGradePronunciation(simulatedText);
   };
 
+  // --- Touch Gesture swipe handlers ---
+  const touchStartY = useRef<number | null>(null);
+  const touchStartX = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY.current === null || touchStartX.current === null) return;
+    const diffY = touchStartY.current - e.changedTouches[0].clientY;
+    const diffX = touchStartX.current - e.changedTouches[0].clientX;
+
+    const threshold = 55; // swipe sensitivity threshold
+    // Vertical swipe check (y diff is larger than x diff and exceeds threshold)
+    if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > threshold) {
+      if (diffY > 0) {
+        handleNextTense();
+      } else {
+        handlePrevTense();
+      }
+    }
+
+    touchStartY.current = null;
+    touchStartX.current = null;
+  };
+
   // --- Navigation Controls ---
   const handlePrevTense = () => {
     setCurrentTenseIndex((prev) => (prev > 0 ? prev - 1 : activeVerb.sentences.length - 1));
@@ -1147,7 +1175,12 @@ export default function App() {
         {/* TTS Warning banner removed */}
 
         {/* CENTRAL MASTER WORKOUT CARD */}
-        <div className="flex-1 md:flex-initial bg-white/5 backdrop-blur-2xl rounded-3xl p-3.5 sm:p-8 md:p-10 shadow-2xl border border-white/10 relative flex flex-col justify-start overflow-y-auto md:overflow-visible min-h-0 scrollbar-thin" id="workout-card">
+        <div 
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className="flex-1 md:flex-initial bg-white/5 backdrop-blur-2xl rounded-3xl p-3.5 sm:p-8 md:p-10 shadow-2xl border border-white/10 relative flex flex-col justify-start overflow-y-auto md:overflow-visible min-h-0 scrollbar-thin select-none" 
+          id="workout-card"
+        >
           
           {/* Tense Badge & Navigation row */}
           {activeVerb.sentences.length > 1 ? (

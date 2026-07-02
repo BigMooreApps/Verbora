@@ -1279,7 +1279,7 @@ export default function App() {
   const progressionPercent = Math.round(((currentTenseIndex + 1) / activeVerb.sentences.length) * 100);
 
   return (
-    <div className="bg-[#0f172a] h-[100dvh] md:h-auto md:min-h-screen text-slate-100 p-2.5 sm:p-4 md:p-8 flex flex-col items-center justify-start font-sans relative overflow-hidden md:overflow-x-hidden md:overflow-y-auto" id="applet-viewport">
+    <div className="bg-[#0f172a] min-h-[100dvh] text-slate-100 p-2.5 sm:p-4 md:p-8 flex flex-col items-center justify-start font-sans relative overflow-y-auto overflow-x-hidden" id="applet-viewport">
       
       {/* Splash Screen Overlay */}
       <AnimatePresence>
@@ -1501,7 +1501,7 @@ export default function App() {
       <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[150px] pointer-events-none select-none z-0"></div>
       <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] bg-teal-500/15 rounded-full blur-[100px] pointer-events-none select-none z-0"></div>
 
-      <div className="w-full max-w-2xl flex flex-col gap-1.5 md:gap-4 h-full md:h-auto z-10 relative overflow-hidden md:overflow-visible" id="applet-container">
+      <div className="w-full max-w-2xl flex flex-col gap-1.5 md:gap-4 z-10 relative overflow-visible" id="applet-container">
         
         {/* HERO APP BAR WITH CONFIGURATION BUTTON */}
         <div className="flex justify-between items-center px-1 mb-0.5" id="hero-app-bar">
@@ -1574,11 +1574,11 @@ export default function App() {
         <div 
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          className="flex-1 md:flex-initial bg-white/5 backdrop-blur-2xl rounded-3xl p-3.5 sm:p-8 md:p-10 shadow-2xl border border-white/10 relative flex flex-col justify-start overflow-hidden md:overflow-visible min-h-0 select-none" 
+          className="w-full bg-white/5 backdrop-blur-2xl rounded-3xl p-3.5 sm:p-8 md:p-10 shadow-2xl border border-white/10 relative flex flex-col justify-start overflow-visible select-none" 
           id="workout-card"
         >
           
-          <div className="relative flex-1 flex flex-col min-h-0 w-full overflow-hidden mt-3 sm:mt-6">
+          <div className="relative w-full overflow-visible mt-3 sm:mt-6">
             <AnimatePresence mode="wait" custom={slideDirection}>
               <motion.div
                 key={`${selectedVerbId}-${currentTenseIndex}`}
@@ -1587,7 +1587,7 @@ export default function App() {
                 initial="enter"
                 animate="center"
                 exit="exit"
-                className="flex-1 flex flex-col justify-start min-h-0 overflow-y-auto pr-1 scrollbar-thin md:overflow-visible"
+                className="w-full flex flex-col justify-start overflow-visible"
               >
                 {/* Practice Phrase Display */}
                 <div className="text-center my-2 sm:my-8 shrink-0" id="core-phrase-section">

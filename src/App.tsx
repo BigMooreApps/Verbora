@@ -165,6 +165,34 @@ function convertTipToI(tip: string, tenseId: string): string {
   return t;
 }
 
+const slideVariants = {
+  enter: (direction: 'up' | 'down') => ({
+    y: direction === 'up' ? 80 : -80,
+    opacity: 0,
+    scale: 0.98
+  }),
+  center: {
+    y: 0,
+    opacity: 1,
+    scale: 1,
+    transition: {
+      y: { type: 'spring', stiffness: 280, damping: 26 },
+      opacity: { duration: 0.2 },
+      scale: { duration: 0.2 }
+    }
+  },
+  exit: (direction: 'up' | 'down') => ({
+    y: direction === 'up' ? -80 : 80,
+    opacity: 0,
+    scale: 0.98,
+    transition: {
+      y: { type: 'spring', stiffness: 280, damping: 26 },
+      opacity: { duration: 0.15 },
+      scale: { duration: 0.15 }
+    }
+  })
+};
+
 export default function App() {
   // --- States ---
   const [exercises, setExercises] = useState<VerbExercise[]>(() => {
@@ -217,6 +245,7 @@ export default function App() {
   const [welcomeInputText, setWelcomeInputText] = useState<string>("");
   const [welcomeIsGenerating, setWelcomeIsGenerating] = useState<boolean>(false);
   const [welcomeError, setWelcomeError] = useState<string>("");
+  const [slideDirection, setSlideDirection] = useState<'up' | 'down'>('up');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -855,10 +884,12 @@ export default function App() {
 
   // --- Navigation Controls ---
   const handlePrevTense = () => {
+    setSlideDirection('down');
     setCurrentTenseIndex((prev) => (prev > 0 ? prev - 1 : activeVerb.sentences.length - 1));
   };
 
   const handleNextTense = () => {
+    setSlideDirection('up');
     setCurrentTenseIndex((prev) => (prev < activeVerb.sentences.length - 1 ? prev + 1 : 0));
   };
 
@@ -1172,13 +1203,11 @@ export default function App() {
           onDeleteVerb={handleDeleteVerb}
         />
 
-        {/* TTS Warning banner removed */}
-
         {/* CENTRAL MASTER WORKOUT CARD */}
         <div 
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          className="flex-1 md:flex-initial bg-white/5 backdrop-blur-2xl rounded-3xl p-3.5 sm:p-8 md:p-10 shadow-2xl border border-white/10 relative flex flex-col justify-start overflow-y-auto md:overflow-visible min-h-0 scrollbar-thin select-none" 
+          className="flex-1 md:flex-initial bg-white/5 backdrop-blur-2xl rounded-3xl p-3.5 sm:p-8 md:p-10 shadow-2xl border border-white/10 relative flex flex-col justify-start overflow-hidden md:overflow-visible min-h-0 select-none" 
           id="workout-card"
         >
           
@@ -1212,144 +1241,158 @@ export default function App() {
               </span>
             </div>
           )}
- 
-          {/* Practice Phrase Display */}
-          <div className="text-center my-2 sm:my-8 shrink-0" id="core-phrase-section">
-            <h1 className="text-white font-bold text-xl sm:text-4xl md:text-5xl leading-tight font-display tracking-tight select-all">
-              {activeSentence.sentence}
-            </h1>
- 
-            {/* Pronunciation Speaker button */}
-            <div className="mt-2.5 sm:mt-5 flex flex-col items-center gap-2" id="tts-audio-trigger">
-              <div className="flex justify-center items-center gap-3">
-                <motion.button
-                  whileHover={{ scale: isGeneratingSpeech ? 1 : 1.1 }}
-                  whileTap={{ scale: isGeneratingSpeech ? 1 : 0.9 }}
-                  disabled={isGeneratingSpeech}
-                  onClick={() => handleSpeakText(activeSentence.sentence)}
-                  className={`w-9 h-9 sm:w-12 sm:h-12 rounded-full border flex items-center justify-center shadow-lg transition-all cursor-pointer ${
-                    isGeneratingSpeech 
-                      ? "bg-teal-500/10 text-teal-300 border-teal-500/20 animate-pulse cursor-not-allowed" 
-                      : "bg-white/5 text-teal-300 border-white/10 hover:bg-teal-400 hover:text-slate-950"
-                  }`}
-                  title="Escuchar pronunciación correcta"
-                >
-                  {isGeneratingSpeech ? (
-                    <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  ) : (
-                    <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                  )}
-                </motion.button>
-              </div>
-              {isGeneratingSpeech && (
-                <span className="text-[10px] text-teal-400/80 font-medium animate-pulse">
-                  Sintetizando voz de IA realista...
-                </span>
-              )}
-            </div>
-          </div>
- 
-          <div className="border-t border-dashed border-white/10 my-2 sm:my-6 shrink-0" />
- 
-          {/* Spanish Meaning Label */}
-          <div className="flex items-center justify-center gap-2 text-white/80 font-medium text-xs sm:text-base md:text-lg py-1 shrink-0" id="spanish-meaning-row">
-            <Globe className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-teal-400" />
-            <span>{activeSentence.translation}</span>
-          </div>
- 
-          {/* Grammar explanation is always visible */}
-          <div className="mt-2 sm:mt-6" id="tip-intro-box">
-            <TenseVisualGuide 
-              tenseId={activeSentence.tenseId}
-              tenseNameEN={activeSentence.tenseNameEN}
-              tenseNameES={activeSentence.tenseNameES}
-              pronunciationTip={activeSentence.pronunciationTip}
-            />
-          </div>
 
-          {/* Real-time speech result container */}
-          <div className="mt-6" id="realtime-interactive-feed">
-            {isListening && (
-              <div className="bg-teal-500/5 text-teal-200 border border-teal-500/20 rounded-2xl p-4 text-center text-sm font-medium animate-pulse">
-                <span className="flex items-center justify-center gap-1.5 text-[10px] text-teal-400 uppercase font-black mb-1.5 tracking-widest">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
-                  </span>
-                  Micrófono Activo
-                </span>
-                <p className="text-white font-bold text-base mt-2">
-                  {interimTranscript || "Esperando voz... Di la frase ahora."}
-                </p>
-              </div>
-            )}
-
-            {!isListening && finalTranscript && !analysisResult && (
-              <div className="bg-white/5 text-white border border-white/10 rounded-2xl p-4 text-center text-sm font-medium">
-                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Dijeste:</p>
-                <p className="text-teal-300 font-bold text-lg mt-1 select-all">"{finalTranscript}"</p>
-                <div className="mt-4 flex gap-3.5 justify-center">
-                  <button 
-                    onClick={() => handleGradePronunciation(finalTranscript)}
-                    className="bg-gradient-to-tr from-teal-500 to-emerald-400 text-slate-950 px-4 py-1.5 rounded-xl text-xs font-bold hover:brightness-110 transition-colors shadow-lg shadow-teal-500/20"
-                  >
-                    Evaluar de nuevo
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setFinalTranscript("");
-                      setInterimTranscript("");
-                    }}
-                    className="bg-white/10 hover:bg-white/15 text-white/95 px-4 py-1.5 rounded-xl text-xs font-bold transition-colors"
-                  >
-                    Borrar
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* ERROR DISPLAY */}
-            {micError && (
-              <div className="bg-rose-500/10 text-rose-300 border border-rose-500/20 rounded-2xl p-4 text-xs text-center font-medium mt-3 flex flex-col gap-1 items-center justify-center">
-                <span className="font-bold flex items-center gap-1 text-rose-200"><AlertTriangle className="w-3.5 h-3.5" /> Micrófono bloqueado</span>
-                <p className="text-white/70">{micError}</p>
-              </div>
-            )}
-
-            {/* TUTOR AI ANALYSIS DISPLAY */}
-            {isAnalyzing && (
-              <div className="bg-teal-500/5 rounded-2xl p-6 text-center border border-teal-500/15">
-                <RefreshCw className="w-6 h-6 animate-spin text-teal-400 mx-auto mb-2" />
-                <p className="text-sm font-bold text-white/90">Analizando pronunciación con IA...</p>
-                <p className="text-xs text-white/50 mt-1">Evaluando fonemas del tiempo verbal exacto.</p>
-              </div>
-            )}
-
-            {serverError && (
-              <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-5 text-center mt-3 text-xs text-rose-300">
-                {serverError === "GEMINI_API_KEY_MISSING" ? (
-                  <div className="space-y-3 text-left">
-                    <span className="font-bold text-sm block text-center text-rose-200">Requiere Gemini API Key</span>
-                    <p className="text-white/70 leading-relaxed text-xs">
-                      El tutor de Inteligencia Artificial requiere configurar tu propia clave. Abre la pestaña <strong className="text-white">Settings &gt; Secrets</strong> en el panel de control de AI Studio y añade tu clave como <strong className="text-white">GEMINI_API_KEY</strong>.
-                    </p>
+          <div className="relative flex-1 flex flex-col min-h-0 w-full overflow-hidden mt-3 sm:mt-6">
+            <AnimatePresence mode="wait" custom={slideDirection}>
+              <motion.div
+                key={`${selectedVerbId}-${currentTenseIndex}`}
+                custom={slideDirection}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                className="flex-1 flex flex-col justify-start min-h-0 overflow-y-auto pr-1 scrollbar-thin md:overflow-visible"
+              >
+                {/* Practice Phrase Display */}
+                <div className="text-center my-2 sm:my-8 shrink-0" id="core-phrase-section">
+                  <h1 className="text-white font-bold text-xl sm:text-4xl md:text-5xl leading-tight font-display tracking-tight select-all">
+                    {activeSentence.sentence}
+                  </h1>
+       
+                  {/* Pronunciation Speaker button */}
+                  <div className="mt-2.5 sm:mt-5 flex flex-col items-center gap-2" id="tts-audio-trigger">
+                    <div className="flex justify-center items-center gap-3">
+                      <motion.button
+                        whileHover={{ scale: isGeneratingSpeech ? 1 : 1.1 }}
+                        whileTap={{ scale: isGeneratingSpeech ? 1 : 0.9 }}
+                        disabled={isGeneratingSpeech}
+                        onClick={() => handleSpeakText(activeSentence.sentence)}
+                        className={`w-9 h-9 sm:w-12 sm:h-12 rounded-full border flex items-center justify-center shadow-lg transition-all cursor-pointer ${
+                          isGeneratingSpeech 
+                            ? "bg-teal-500/10 text-teal-300 border-teal-500/20 animate-pulse cursor-not-allowed" 
+                            : "bg-white/5 text-teal-300 border-white/10 hover:bg-teal-400 hover:text-slate-950"
+                        }`}
+                        title="Escuchar pronunciación correcta"
+                      >
+                        {isGeneratingSpeech ? (
+                          <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                        )}
+                      </motion.button>
+                    </div>
+                    {isGeneratingSpeech && (
+                      <span className="text-[10px] text-teal-400/80 font-medium animate-pulse">
+                        Sintetizando voz de IA realista...
+                      </span>
+                    )}
                   </div>
-                ) : (
-                  <p>{serverError}</p>
-                )}
-              </div>
-            )}
-
-            <AnimatePresence mode="wait">
-              {analysisResult && (
-                <PronunciationDetails 
-                  result={analysisResult} 
-                  expectedSentence={activeSentence.sentence} 
-                />
-              )}
+                </div>
+       
+                <div className="border-t border-dashed border-white/10 my-2 sm:my-6 shrink-0" />
+       
+                {/* Spanish Meaning Label */}
+                <div className="flex items-center justify-center gap-2 text-white/80 font-medium text-xs sm:text-base md:text-lg py-1 shrink-0" id="spanish-meaning-row">
+                  <Globe className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-teal-400" />
+                  <span>{activeSentence.translation}</span>
+                </div>
+       
+                {/* Grammar explanation is always visible */}
+                <div className="mt-2 sm:mt-6" id="tip-intro-box">
+                  <TenseVisualGuide 
+                    tenseId={activeSentence.tenseId}
+                    tenseNameEN={activeSentence.tenseNameEN}
+                    tenseNameES={activeSentence.tenseNameES}
+                    pronunciationTip={activeSentence.pronunciationTip}
+                  />
+                </div>
+      
+                {/* Real-time speech result container */}
+                <div className="mt-6" id="realtime-interactive-feed">
+                  {isListening && (
+                    <div className="bg-teal-500/5 text-teal-200 border border-teal-500/20 rounded-2xl p-4 text-center text-sm font-medium animate-pulse">
+                      <span className="flex items-center justify-center gap-1.5 text-[10px] text-teal-400 uppercase font-black mb-1.5 tracking-widest">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                        </span>
+                        Micrófono Activo
+                      </span>
+                      <p className="text-white font-bold text-base mt-2">
+                        {interimTranscript || "Esperando voz... Di la frase ahora."}
+                      </p>
+                    </div>
+                  )}
+      
+                  {!isListening && finalTranscript && !analysisResult && (
+                    <div className="bg-white/5 text-white border border-white/10 rounded-2xl p-4 text-center text-sm font-medium">
+                      <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Dijeste:</p>
+                      <p className="text-teal-300 font-bold text-lg mt-1 select-all">"{finalTranscript}"</p>
+                      <div className="mt-4 flex gap-3.5 justify-center">
+                        <button 
+                          onClick={() => handleGradePronunciation(finalTranscript)}
+                          className="bg-gradient-to-tr from-teal-500 to-emerald-400 text-slate-950 px-4 py-1.5 rounded-xl text-xs font-bold hover:brightness-110 transition-colors shadow-lg shadow-teal-500/20"
+                        >
+                          Evaluar de nuevo
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setFinalTranscript("");
+                            setInterimTranscript("");
+                          }}
+                          className="bg-white/10 hover:bg-white/15 text-white/95 px-4 py-1.5 rounded-xl text-xs font-bold transition-colors"
+                        >
+                          Borrar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+      
+                  {/* ERROR DISPLAY */}
+                  {micError && (
+                    <div className="bg-rose-500/10 text-rose-300 border border-rose-500/20 rounded-2xl p-4 text-xs text-center font-medium mt-3 flex flex-col gap-1 items-center justify-center">
+                      <span className="font-bold flex items-center gap-1 text-rose-200"><AlertTriangle className="w-3.5 h-3.5" /> Micrófono bloqueado</span>
+                      <p className="text-white/70">{micError}</p>
+                    </div>
+                  )}
+      
+                  {/* TUTOR AI ANALYSIS DISPLAY */}
+                  {isAnalyzing && (
+                    <div className="bg-teal-500/5 rounded-2xl p-6 text-center border border-teal-500/15">
+                      <RefreshCw className="w-6 h-6 animate-spin text-teal-400 mx-auto mb-2" />
+                      <p className="text-sm font-bold text-white/90">Analizando pronunciación con IA...</p>
+                      <p className="text-xs text-white/50 mt-1">Evaluando fonemas del tiempo verbal exacto.</p>
+                    </div>
+                  )}
+      
+                  {serverError && (
+                    <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-5 text-center mt-3 text-xs text-rose-300">
+                      {serverError === "GEMINI_API_KEY_MISSING" ? (
+                        <div className="space-y-3 text-left">
+                          <span className="font-bold text-sm block text-center text-rose-200">Requiere Gemini API Key</span>
+                          <p className="text-white/70 leading-relaxed text-xs">
+                            El tutor de Inteligencia Artificial requiere configurar tu propia clave. Abre la pestaña <strong className="text-white">Settings &gt; Secrets</strong> en el panel de control de AI Studio y añade tu clave como <strong className="text-white">GEMINI_API_KEY</strong>.
+                          </p>
+                        </div>
+                      ) : (
+                        <p>{serverError}</p>
+                      )}
+                    </div>
+                  )}
+      
+                  <AnimatePresence mode="wait">
+                    {analysisResult && (
+                      <PronunciationDetails 
+                        result={analysisResult} 
+                        expectedSentence={activeSentence.sentence} 
+                      />
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
             </AnimatePresence>
           </div>
         </div>

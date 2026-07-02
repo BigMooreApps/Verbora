@@ -640,6 +640,7 @@ Reglas importantes:
 - Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, they) entre las 12 oraciones para que la práctica sea rica y abarque todas las personas gramaticales.
 - Las oraciones deben ser cortas, claras, gramaticalmente correctas y apropiadas para practicar pronunciación.
 - Para cada oración, proporciona una traducción de NIVEL PROFESIONAL al español latino / español de América (evitando términos específicos de España como "vosotros", etc.). La traducción debe ser sumamente natural, fluida y exacta, respetando al 100% el significado de la oración original, y adaptada a la cultura latinoamericana.
+- Evita traducciones literales o palabra por palabra si suenan poco naturales en español de América. Por ejemplo, en lugar de traducir "ride" como "montar" a secas (que suena incompleto), tradúcelo contextualmente de forma coherente según la frase (ej: "montar en bicicleta", "pasear a caballo", "manejar", etc.). Todas las oraciones deben reflejar situaciones de la vida real de manera coherente y natural.
 - Proporciona también un consejo fonético corto de gran utilidad escrito en español para el participante.`;
 
       const prompt = `Analiza y genera los 12 tiempos verbales para la siguiente entrada: "${inputClean}".

@@ -1279,80 +1279,7 @@ export default function App() {
                   />
                 </div>
       
-                {/* Real-time speech result container */}
-                <div className="mt-6" id="realtime-interactive-feed">
-                  {isListening && (
-                    <div className="bg-teal-500/5 text-teal-200 border border-teal-500/20 rounded-2xl p-4 text-center text-sm font-medium animate-pulse">
-                      <span className="flex items-center justify-center gap-1.5 text-[10px] text-teal-400 uppercase font-black mb-1.5 tracking-widest">
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
-                        </span>
-                        Micrófono Activo
-                      </span>
-                      <p className="text-white font-bold text-base mt-2">
-                        {interimTranscript || "Esperando voz... Di la frase ahora."}
-                      </p>
-                    </div>
-                  )}
-      
-                  {!isListening && finalTranscript && !analysisResult && (
-                    <div className="bg-white/5 text-white border border-white/10 rounded-2xl p-4 text-center text-sm font-medium">
-                      <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Dijeste:</p>
-                      <p className="text-teal-300 font-bold text-lg mt-1 select-all">"{finalTranscript}"</p>
-                      <div className="mt-4 flex gap-3.5 justify-center">
-                        <button 
-                          onClick={() => handleGradePronunciation(finalTranscript)}
-                          className="bg-gradient-to-tr from-teal-500 to-emerald-400 text-slate-950 px-4 py-1.5 rounded-xl text-xs font-bold hover:brightness-110 transition-colors shadow-lg shadow-teal-500/20"
-                        >
-                          Evaluar de nuevo
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setFinalTranscript("");
-                            setInterimTranscript("");
-                          }}
-                          className="bg-white/10 hover:bg-white/15 text-white/95 px-4 py-1.5 rounded-xl text-xs font-bold transition-colors"
-                        >
-                          Borrar
-                        </button>
-                      </div>
-                    </div>
-                  )}
-      
-                  {/* ERROR DISPLAY */}
-                  {micError && (
-                    <div className="bg-rose-500/10 text-rose-300 border border-rose-500/20 rounded-2xl p-4 text-xs text-center font-medium mt-3 flex flex-col gap-1 items-center justify-center">
-                      <span className="font-bold flex items-center gap-1 text-rose-200"><AlertTriangle className="w-3.5 h-3.5" /> Micrófono bloqueado</span>
-                      <p className="text-white/70">{micError}</p>
-                    </div>
-                  )}
-      
-                  {/* TUTOR AI ANALYSIS DISPLAY */}
-                  {isAnalyzing && (
-                    <div className="bg-teal-500/5 rounded-2xl p-6 text-center border border-teal-500/15">
-                      <RefreshCw className="w-6 h-6 animate-spin text-teal-400 mx-auto mb-2" />
-                      <p className="text-sm font-bold text-white/90">Analizando pronunciación con IA...</p>
-                      <p className="text-xs text-white/50 mt-1">Evaluando fonemas del tiempo verbal exacto.</p>
-                    </div>
-                  )}
-      
-                  {serverError && (
-                    <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-5 text-center mt-3 text-xs text-rose-300">
-                      {serverError === "GEMINI_API_KEY_MISSING" ? (
-                        <div className="space-y-3 text-left">
-                          <span className="font-bold text-sm block text-center text-rose-200">Requiere Gemini API Key</span>
-                          <p className="text-white/70 leading-relaxed text-xs">
-                            El tutor de Inteligencia Artificial requiere configurar tu propia clave. Abre la pestaña <strong className="text-white">Settings &gt; Secrets</strong> en el panel de control de AI Studio y añade tu clave como <strong className="text-white">GEMINI_API_KEY</strong>.
-                          </p>
-                        </div>
-                      ) : (
-                        <p>{serverError}</p>
-                      )}
-                    </div>
-                  )}
-      
-                </div>
+
               </motion.div>
             </AnimatePresence>
           </div>
@@ -1448,6 +1375,77 @@ export default function App() {
           </span>
         </div>
  
+
+        {/* MODAL DE LOADER / ANALIZANDO PRONUNCIACIÓN */}
+        <AnimatePresence>
+          {isAnalyzing && (
+            <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="bg-[#131b2e] border border-white/10 p-8 rounded-3xl shadow-2xl flex flex-col items-center justify-center gap-4 text-center max-w-xs z-10"
+              >
+                <RefreshCw className="w-10 h-10 animate-spin text-teal-400" />
+                <h3 className="text-white font-bold text-sm">Analizando pronunciación...</h3>
+                <p className="text-xs text-white/50">El tutor de Inteligencia Artificial está evaluando tus fonemas en tiempo real.</p>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* MODAL DE ERRORES (MICRÓFONO / SERVIDOR) */}
+        <AnimatePresence>
+          {(micError || serverError) && (
+            <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => {
+                  setMicError(null);
+                  setServerError(null);
+                }}
+                className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+              />
+
+              {/* Modal Body */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                className="relative w-full max-w-sm bg-[#131b2e] border border-rose-500/30 rounded-3xl shadow-2xl p-6 flex flex-col gap-4 text-center z-10"
+              >
+                <AlertTriangle className="w-10 h-10 text-rose-400 mx-auto" />
+                <h3 className="text-white font-bold text-sm">Ocurrió un inconveniente</h3>
+                
+                {serverError === "GEMINI_API_KEY_MISSING" ? (
+                  <div className="text-left space-y-2">
+                    <span className="font-bold text-xs text-rose-200 block text-center">Requiere Gemini API Key</span>
+                    <p className="text-white/60 leading-relaxed text-[11px]">
+                      El tutor de Inteligencia Artificial requiere configurar tu propia clave. Abre la pestaña <strong>Settings &gt; Secrets</strong> en el panel de control de AI Studio y añade tu clave como <strong>GEMINI_API_KEY</strong>.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-xs text-rose-300 bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl">
+                    {micError || serverError}
+                  </p>
+                )}
+
+                <button
+                  onClick={() => {
+                    setMicError(null);
+                    setServerError(null);
+                  }}
+                  className="w-full py-2.5 bg-white/10 hover:bg-white/15 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+                >
+                  Cerrar
+                </button>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
         {/* MODAL EMERGENTE DE RETROALIMENTACIÓN DE PRONUNCIACIÓN */}
         <AnimatePresence>

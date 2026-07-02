@@ -881,7 +881,7 @@ export default function App() {
           <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#7c3aed" /> {/* violet-600 */}
             <stop offset="50%" stopColor="#3b82f6" /> {/* blue-500 */}
-            <stop offset="100%" stopColor="#14b8a6" /> {/* teal-500 */}
+            <stop offset="100%" stopColor="#06b6d4" /> {/* cyan-500 */}
           </linearGradient>
         </defs>
       </svg>

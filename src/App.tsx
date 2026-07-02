@@ -23,7 +23,9 @@ import {
   Settings,
   X,
   Key,
-  Check
+  Check,
+  Sparkles,
+  Plus
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -220,7 +222,7 @@ export default function App() {
     const timer = setTimeout(() => {
       setShowSplash(false);
       setShowWelcomeScreen(true);
-    }, 5000);
+    }, 3000);
     return () => clearTimeout(timer);
   }, []);
 

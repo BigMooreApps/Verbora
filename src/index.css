@@ -32,8 +32,10 @@
   --color-emerald-950: #2e1065;
 }
 
-body {
+html, body {
   background-color: #0f172a;
+  overscroll-behavior-y: contain;
+  overscroll-behavior-x: none;
 }
 
 /* Hide scrollbars for all scrollable elements across Chrome, Safari, Firefox, and Edge */

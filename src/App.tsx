@@ -495,13 +495,13 @@ export default function App() {
 
   // Autoplay audio when active sentence changes
   useEffect(() => {
-    if (autoplayTts && activeSentence && activeSentence.sentence) {
+    if (!showSplash && !showWelcomeScreen && autoplayTts && activeSentence && activeSentence.sentence) {
       const timer = setTimeout(() => {
         handleSpeakText(activeSentence.sentence);
       }, 250);
       return () => clearTimeout(timer);
     }
-  }, [selectedVerbId, currentTenseIndex, autoplayTts]);
+  }, [selectedVerbId, currentTenseIndex, autoplayTts, showSplash, showWelcomeScreen]);
 
   // Clean up recognition ref on unmount
   useEffect(() => {

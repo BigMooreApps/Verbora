@@ -158,9 +158,288 @@ function convertTipToI(tip: string, tenseId: string): string {
   t = t.replace(/\/ʃiː\s+/g, "/aɪ /");
   t = t.replace(/\/ðeɪ\s+/g, "/aɪ /");
   t = t.replace(/\/wiː\s+/g, "/aɪ /");
-  t = t.replace(/\/wɜːr\s+/g, "/wəz /");
   t = t.replace(/\/ɪz\s+/g, "/æm /");
   t = t.replace(/\/hæz\s+/g, "/hæv /");
+
+  return t;
+}
+
+function convertEnglishFromIToSubject(sentence: string, tenseId: string, verbEN: string, subject: string): string {
+  if (subject === "I") return sentence;
+  const baseVerb = verbEN.replace(/^(to)\s+/i, "").trim().toLowerCase();
+
+  if (tenseId === "simple-present") {
+    if (baseVerb === "be") {
+      if (subject === "He" || subject === "She" || subject === "It") return `${subject} is`;
+      return `${subject} are`;
+    }
+    if (baseVerb === "have") {
+      if (subject === "He" || subject === "She" || subject === "It") return `${subject} has`;
+      return `${subject} have`;
+    }
+    if (baseVerb === "go") {
+      if (subject === "He" || subject === "She" || subject === "It") return `${subject} goes`;
+      return `${subject} go`;
+    }
+    if (baseVerb === "do") {
+      if (subject === "He" || subject === "She" || subject === "It") return `${subject} does`;
+      return `${subject} do`;
+    }
+    
+    let v = baseVerb;
+    if (subject === "He" || subject === "She" || subject === "It") {
+      if (v.endsWith("y") && !/[aeiou]y$/i.test(v)) {
+        v = v.replace(/y$/i, "ies");
+      } else if (v.endsWith("sh") || v.endsWith("ch") || v.endsWith("x") || v.endsWith("s") || v.endsWith("o") || v.endsWith("z")) {
+        v = v + "es";
+      } else {
+        v = v + "s";
+      }
+    }
+    
+    const afterVerb = sentence.replace(/^I\s+\w+/i, "").trim();
+    return `${subject} ${v}${afterVerb ? " " + afterVerb : ""}`;
+  }
+  
+  if (tenseId === "present-continuous") {
+    const helper = (subject === "He" || subject === "She" || subject === "It") ? "is" : "are";
+    return sentence.replace(/^I\s+am/i, `${subject} ${helper}`);
+  }
+  
+  if (tenseId === "past-continuous") {
+    const helper = (subject === "He" || subject === "She" || subject === "It") ? "was" : "were";
+    return sentence.replace(/^I\s+was/i, `${subject} ${helper}`);
+  }
+
+  if (tenseId === "simple-past" && baseVerb === "be") {
+    const helper = (subject === "He" || subject === "She" || subject === "It") ? "was" : "were";
+    return `${subject} ${helper}`;
+  }
+  
+  if (tenseId === "present-perfect" || tenseId === "present-perfect-continuous") {
+    const helper = (subject === "He" || subject === "She" || subject === "It") ? "has" : "have";
+    return sentence.replace(/^I\s+have/i, `${subject} ${helper}`);
+  }
+  
+  return sentence.replace(/^I\b/i, subject);
+}
+
+function conjugateSpanishPresent(verbES: string, subject: string): string {
+  const v = verbES.toLowerCase().replace(/^(a|to)\s+/i, "").trim();
+  if (v === "ir") {
+    if (subject === "Tú") return "vas";
+    if (subject === "Él" || subject === "Ella") return "va";
+    if (subject === "Nosotros") return "vamos";
+    return "van";
+  }
+  if (v === "ser") {
+    if (subject === "Tú") return "eres";
+    if (subject === "Él" || subject === "Ella") return "es";
+    if (subject === "Nosotros") return "somos";
+    return "son";
+  }
+  if (v === "estar") {
+    if (subject === "Tú") return "estás";
+    if (subject === "Él" || subject === "Ella") return "está";
+    if (subject === "Nosotros") return "estamos";
+    return "están";
+  }
+  if (v === "hacer") {
+    if (subject === "Tú") return "haces";
+    if (subject === "Él" || subject === "Ella") return "hace";
+    if (subject === "Nosotros") return "hacemos";
+    return "hacen";
+  }
+  if (v === "decir") {
+    if (subject === "Tú") return "dices";
+    if (subject === "Él" || subject === "Ella") return "dice";
+    if (subject === "Nosotros") return "decimos";
+    return "dicen";
+  }
+  if (v === "tener") {
+    if (subject === "Tú") return "tienes";
+    if (subject === "Él" || subject === "Ella") return "tiene";
+    if (subject === "Nosotros") return "tenemos";
+    return "tienen";
+  }
+  
+  const root = v.replace(/(ar|er|ir)$/i, "");
+  const isAr = v.endsWith("ar");
+  const isEr = v.endsWith("er");
+  
+  if (subject === "Tú") return root + (isAr ? "as" : "es");
+  if (subject === "Él" || subject === "Ella") return root + (isAr ? "a" : "e");
+  if (subject === "Nosotros") return root + (isAr ? "amos" : isEr ? "emos" : "imos");
+  return root + (isAr ? "an" : "en");
+}
+
+function conjugateSpanishPast(verbES: string, subject: string): string {
+  const v = verbES.toLowerCase().replace(/^(a|to)\s+/i, "").trim();
+  if (v === "ir" || v === "ser") {
+    if (subject === "Tú") return "fuiste";
+    if (subject === "Él" || subject === "Ella") return "fue";
+    if (subject === "Nosotros") return "fuimos";
+    return "fueron";
+  }
+  if (v === "hacer") {
+    if (subject === "Tú") return "hiciste";
+    if (subject === "Él" || subject === "Ella") return "hizo";
+    if (subject === "Nosotros") return "hicimos";
+    return "hicieron";
+  }
+  if (v === "decir") {
+    if (subject === "Tú") return "dijiste";
+    if (subject === "Él" || subject === "Ella") return "dijo";
+    if (subject === "Nosotros") return "dijimos";
+    return "dijeron";
+  }
+  if (v === "tener") {
+    if (subject === "Tú") return "tuviste";
+    if (subject === "Él" || subject === "Ella") return "tuvo";
+    if (subject === "Nosotros") return "tuvimos";
+    return "tuvieron";
+  }
+  if (v === "estar") {
+    if (subject === "Tú") return "estuviste";
+    if (subject === "Él" || subject === "Ella") return "estuvo";
+    if (subject === "Nosotros") return "estuvimos";
+    return "estuvieron";
+  }
+
+  const root = v.replace(/(ar|er|ir)$/i, "");
+  const isAr = v.endsWith("ar");
+  
+  if (subject === "Tú") return root + (isAr ? "aste" : "iste");
+  if (subject === "Él" || subject === "Ella") return root + (isAr ? "ó" : "ió");
+  if (subject === "Nosotros") return root + (isAr ? "amos" : "imos");
+  return root + (isAr ? "aron" : "ieron");
+}
+
+function conjugateSpanishFuture(verbES: string, subject: string): string {
+  const v = verbES.toLowerCase().replace(/^(a|to)\s+/i, "").trim();
+  let stem = v;
+  if (v === "hacer") stem = "har";
+  else if (v === "decir") stem = "dir";
+  else if (v === "tener") stem = "tendr";
+  else if (v === "poner") stem = "pondr";
+  else if (v === "salir") stem = "saldr";
+  else if (v === "venir") stem = "vendr";
+  else if (v === "poder") stem = "podr";
+  else if (v === "saber") stem = "sabr";
+  else if (v === "querer") stem = "querr";
+
+  if (subject === "Tú") return stem + "ás";
+  if (subject === "Él" || subject === "Ella") return stem + "á";
+  if (subject === "Nosotros") return stem + "emos";
+  return stem + "án";
+}
+
+function convertSpanishFromYoToSubject(translation: string, tenseId: string, verbES: string, subject: string): string {
+  if (subject === "Yo") return translation;
+
+  if (tenseId === "simple-present") {
+    return `${subject} ${conjugateSpanishPresent(verbES, subject)}`;
+  }
+  if (tenseId === "simple-past") {
+    return `${subject} ${conjugateSpanishPast(verbES, subject)}`;
+  }
+  if (tenseId === "simple-future") {
+    return `${subject} ${conjugateSpanishFuture(verbES, subject)}`;
+  }
+
+  let t = translation;
+  
+  if (subject === "Tú") {
+    t = t.replace(/^Yo\s+estoy\s+/i, "Tú estás ");
+    t = t.replace(/^Yo\s+estaba\s+/i, "Tú estabas ");
+    t = t.replace(/^Yo\s+he\s+/i, "Tú has ");
+    t = t.replace(/^Yo\s+había\s+/i, "Tú habías ");
+    t = t.replace(/^Yo\s+estaré\s+/i, "Tú estarás ");
+    t = t.replace(/^Yo\s+habré\s+/i, "Tú habrás ");
+    t = t.replace(/^Yo\s+estaría\s+/i, "Tú estarías ");
+    t = t.replace(/^Yo\s+(\w+)(aría)\b/i, (_, stem) => `Tú ${stem}arías`);
+    t = t.replace(/^Yo\s+(\w+)(ería)\b/i, (_, stem) => `Tú ${stem}erías`);
+    t = t.replace(/^Yo\s+(\w+)(iría)\b/i, (_, stem) => `Tú ${stem}irías`);
+  } else if (subject === "Él" || subject === "Ella") {
+    t = t.replace(/^Yo\s+estoy\s+/i, `${subject} está `);
+    t = t.replace(/^Yo\s+estaba\s+/i, `${subject} estaba `);
+    t = t.replace(/^Yo\s+he\s+/i, `${subject} ha `);
+    t = t.replace(/^Yo\s+había\s+/i, `${subject} había `);
+    t = t.replace(/^Yo\s+estaré\s+/i, `${subject} estará `);
+    t = t.replace(/^Yo\s+habré\s+/i, `${subject} habrá `);
+    t = t.replace(/^Yo\s+estaría\s+/i, `${subject} estaría `);
+    t = t.replace(/^Yo\s+(\w+)(aría)\b/i, (_, stem) => `${subject} ${stem}aría`);
+    t = t.replace(/^Yo\s+(\w+)(ería)\b/i, (_, stem) => `${subject} ${stem}ería`);
+    t = t.replace(/^Yo\s+(\w+)(iría)\b/i, (_, stem) => `${subject} ${stem}iría`);
+  } else if (subject === "Nosotros") {
+    t = t.replace(/^Yo\s+estoy\s+/i, "Nosotros estamos ");
+    t = t.replace(/^Yo\s+estaba\s+/i, "Nosotros estábamos ");
+    t = t.replace(/^Yo\s+he\s+/i, "Nosotros hemos ");
+    t = t.replace(/^Yo\s+había\s+/i, "Nosotros habíamos ");
+    t = t.replace(/^Yo\s+estaré\s+/i, "Nosotros estaremos ");
+    t = t.replace(/^Yo\s+habré\s+/i, "Nosotros habremos ");
+    t = t.replace(/^Yo\s+estaría\s+/i, "Nosotros estaríamos ");
+    t = t.replace(/^Yo\s+(\w+)(aría)\b/i, (_, stem) => `Nosotros ${stem}aríamos`);
+    t = t.replace(/^Yo\s+(\w+)(ería)\b/i, (_, stem) => `Nosotros ${stem}eríamos`);
+    t = t.replace(/^Yo\s+(\w+)(iría)\b/i, (_, stem) => `Nosotros ${stem}iríamos`);
+  } else if (subject === "Ellos" || subject === "Ellas") {
+    t = t.replace(/^Yo\s+estoy\s+/i, `${subject} están `);
+    t = t.replace(/^Yo\s+estaba\s+/i, `${subject} estaban `);
+    t = t.replace(/^Yo\s+he\s+/i, `${subject} han `);
+    t = t.replace(/^Yo\s+había\s+/i, `${subject} habían `);
+    t = t.replace(/^Yo\s+estaré\s+/i, `${subject} estarán `);
+    t = t.replace(/^Yo\s+habré\s+/i, `${subject} habrán `);
+    t = t.replace(/^Yo\s+estaría\s+/i, `${subject} estarían `);
+    t = t.replace(/^Yo\s+(\w+)(aría)\b/i, (_, stem) => `${subject} ${stem}arían`);
+    t = t.replace(/^Yo\s+(\w+)(ería)\b/i, (_, stem) => `${subject} ${stem}erían`);
+    t = t.replace(/^Yo\s+(\w+)(iría)\b/i, (_, stem) => `${subject} ${stem}irían`);
+  }
+
+  return t;
+}
+
+function convertTipToSubject(tip: string, tenseId: string, subject: string): string {
+  if (subject === "I") {
+    return convertTipToI(tip, tenseId);
+  }
+  
+  let t = tip;
+  t = t.replace(/\btú\b/ig, subject.toLowerCase());
+  t = t.replace(/\bella\b/ig, subject.toLowerCase());
+  t = t.replace(/\bnosotros\b/ig, subject.toLowerCase());
+  t = t.replace(/\bellos\b/ig, subject.toLowerCase());
+  t = t.replace(/\bél\b/ig, subject.toLowerCase());
+  t = t.replace(/\byo\b/ig, subject.toLowerCase());
+
+  const subLower = subject.toLowerCase();
+  if (subLower === "he" || subLower === "she") {
+    t = t.replace(/'are'/g, "'is'");
+    t = t.replace(/'am'/g, "'is'");
+    t = t.replace(/'were'/g, "'was'");
+    t = t.replace(/'have'/g, "'has'");
+    
+    t = t.replace(/\/juː\s+/g, `/${subLower} `);
+    t = t.replace(/\/aɪ\s+/g, `/${subLower} `);
+    t = t.replace(/\/wiː\s+/g, `/${subLower} `);
+    t = t.replace(/\/ðeɪ\s+/g, `/${subLower} `);
+    t = t.replace(/\/wɜːr\s+/g, "/wəz ");
+    t = t.replace(/\/æm\s+/g, "/ɪz ");
+    t = t.replace(/\/hæv\s+/g, "/hæz ");
+  } else if (subLower === "you" || subLower === "we" || subLower === "they") {
+    t = t.replace(/'is'/g, "'are'");
+    t = t.replace(/'am'/g, "'are'");
+    t = t.replace(/'was'/g, "'were'");
+    t = t.replace(/'has'/g, "'have'");
+    
+    t = t.replace(/\/aɪ\s+/g, `/${subLower} `);
+    t = t.replace(/\/ʃiː\s+/g, `/${subLower} `);
+    t = t.replace(/\/wiː\s+/g, `/${subLower} `);
+    t = t.replace(/\/ðeɪ\s+/g, `/${subLower} `);
+    t = t.replace(/\/wəz\s+/g, "/wɜːr ");
+    t = t.replace(/\/æm\s+/g, "/ɑːr ");
+    t = t.replace(/\/ɪz\s+/g, "/ɑːr ");
+    t = t.replace(/\/hæz\s+/g, "/hæv ");
+  }
 
   return t;
 }
@@ -410,7 +689,18 @@ export default function App() {
 
   const activeSentence = useMemo(() => {
     if (useAllSubjects) {
-      return rawActiveSentence;
+      const SUBJECTS_EN = ["I", "You", "He", "She", "We", "They"];
+      const SUBJECTS_ES = ["Yo", "Tú", "Él", "Ella", "Nosotros", "Ellos"];
+      const subjectIdx = currentTenseIndex % 6;
+      const targetSubjectEN = SUBJECTS_EN[subjectIdx];
+      const targetSubjectES = SUBJECTS_ES[subjectIdx];
+
+      return {
+        ...rawActiveSentence,
+        sentence: convertEnglishFromIToSubject(rawActiveSentence.sentence, rawActiveSentence.tenseId, activeVerb.verbEN, targetSubjectEN),
+        translation: convertSpanishFromYoToSubject(rawActiveSentence.translation, rawActiveSentence.tenseId, activeVerb.verbES, targetSubjectES),
+        pronunciationTip: convertTipToSubject(rawActiveSentence.pronunciationTip, rawActiveSentence.tenseId, targetSubjectEN)
+      };
     }
     return {
       ...rawActiveSentence,
@@ -418,7 +708,7 @@ export default function App() {
       translation: convertSpanishToYo(rawActiveSentence.translation, rawActiveSentence.tenseId, activeVerb.verbES),
       pronunciationTip: convertTipToI(rawActiveSentence.pronunciationTip, rawActiveSentence.tenseId)
     };
-  }, [rawActiveSentence, useAllSubjects, activeVerb.verbEN, activeVerb.verbES]);
+  }, [rawActiveSentence, useAllSubjects, activeVerb.verbEN, activeVerb.verbES, currentTenseIndex]);
 
   // Speech Recognition reference
   const recognitionRef = useRef<any>(null);

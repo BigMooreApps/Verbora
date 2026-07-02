@@ -211,11 +211,16 @@ export default function App() {
 
   // Splash Screen State
   const [showSplash, setShowSplash] = useState<boolean>(true);
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState<boolean>(false);
+  const [welcomeInputText, setWelcomeInputText] = useState<string>("");
+  const [welcomeIsGenerating, setWelcomeIsGenerating] = useState<boolean>(false);
+  const [welcomeError, setWelcomeError] = useState<string>("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 3000);
+      setShowWelcomeScreen(true);
+    }, 5000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -862,14 +867,164 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="flex flex-col items-center justify-center max-w-sm px-6 text-center"
+              className="flex flex-col items-center justify-center px-6 text-center"
             >
               <img 
                 src={logoVerbora} 
                 alt="Verbora Logo" 
-                className="w-72 h-auto object-contain select-none"
+                className="w-[85vw] max-w-[600px] h-auto object-contain select-none animate-pulse"
                 referrerPolicy="no-referrer"
               />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Welcome Screen Overlay */}
+      <AnimatePresence>
+        {showWelcomeScreen && (
+          <motion.div
+            key="welcome"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-[#081125]/95 backdrop-blur-md flex flex-col items-center justify-center z-[9998] p-4 overflow-y-auto"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ delay: 0.1, duration: 0.4 }}
+              className="bg-slate-900 border border-white/10 p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-lg mx-auto flex flex-col gap-6 relative"
+            >
+              {/* Logo / Header */}
+              <div className="flex flex-col items-center text-center gap-2">
+                <img 
+                  src={logoVerbora} 
+                  alt="Verbora" 
+                  className="w-48 h-auto object-contain select-none mb-1"
+                />
+                <h3 className="text-xl sm:text-2xl font-bold text-white font-display">
+                  ¡Te damos la bienvenida!
+                </h3>
+                <p className="text-xs sm:text-sm text-white/60">
+                  Selecciona uno de los verbos recomendados o escribe la palabra que desees practicar.
+                </p>
+              </div>
+
+              {/* Predefined Verbs Grid */}
+              <div className="space-y-3">
+                <span className="text-[10px] font-bold text-teal-400 tracking-wider uppercase">Verbos Recomendados</span>
+                <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
+                  {exercises.slice(0, 6).map((verb) => (
+                    <button
+                      key={verb.id}
+                      onClick={() => {
+                        setSelectedVerbId(verb.id);
+                        setCurrentTenseIndex(0);
+                        setShowWelcomeScreen(false);
+                      }}
+                      className="p-3 rounded-2xl bg-white/5 hover:bg-teal-500/10 border border-white/5 hover:border-teal-500/20 text-white text-left transition-all flex flex-col gap-1 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      <span className="text-xs font-bold font-display">{verb.verbEN}</span>
+                      <span className="text-[10px] text-white/40 truncate">{verb.verbES}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Input Section */}
+              <div className="space-y-3">
+                <span className="text-[10px] font-bold text-teal-400 tracking-wider uppercase">Escribe tu propio verbo o frase</span>
+                <form 
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    setWelcomeError("");
+                    if (!welcomeInputText.trim()) {
+                      setWelcomeError("Por favor ingresa una palabra.");
+                      return;
+                    }
+                    setWelcomeIsGenerating(true);
+                    try {
+                      const userApiKey = localStorage.getItem("geminiApiKey") || "";
+                      const response = await fetch("/api/generate-tenses", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          ...(userApiKey ? { "x-gemini-api-key": userApiKey } : {})
+                        },
+                        body: JSON.stringify({
+                          inputText: welcomeInputText.trim(),
+                        }),
+                      });
+                      if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData.message || "Error al conectar con la IA.");
+                      }
+                      const data = await response.json();
+                      if (!data.sentences || data.sentences.length === 0) {
+                        throw new Error("No se generó el conjunto de tiempos verbales.");
+                      }
+                      const newVerb: VerbExercise = {
+                        id: "custom-" + Date.now(),
+                        verbEN: data.verbEN || welcomeInputText.trim(),
+                        verbES: data.verbES || "Cargado",
+                        difficulty: data.difficulty || "Básico",
+                        isCustom: true,
+                        sentences: data.sentences,
+                      };
+                      handleAddVerb(newVerb);
+                      setShowWelcomeScreen(false);
+                    } catch (err: any) {
+                      setWelcomeError(err.message || "Error al generar.");
+                    } finally {
+                      setWelcomeIsGenerating(false);
+                    }
+                  }}
+                  className="flex flex-col gap-3"
+                >
+                  <div className="relative flex items-center">
+                    <input
+                      type="text"
+                      placeholder="Ej: Speak, Estudiar, Play..."
+                      disabled={welcomeIsGenerating}
+                      value={welcomeInputText}
+                      onChange={(e) => setWelcomeInputText(e.target.value)}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl p-3.5 pr-12 text-white placeholder-white/30 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all text-sm font-medium"
+                    />
+                    <Sparkles className="absolute right-4 w-4 h-4 text-teal-400 pointer-events-none" />
+                  </div>
+
+                  {welcomeError && (
+                    <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl flex items-center gap-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                      {welcomeError}
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={welcomeIsGenerating}
+                    className={`w-full py-3.5 rounded-xl text-slate-950 font-extrabold text-sm shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      welcomeIsGenerating 
+                        ? "bg-teal-500/20 text-teal-300 border border-teal-500/30 animate-pulse cursor-not-allowed" 
+                        : "bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-500 hover:to-emerald-500 transform active:scale-[0.98]"
+                    }`}
+                  >
+                    {welcomeIsGenerating ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        Generando Escenarios con IA...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" />
+                        Comenzar a practicar
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
             </motion.div>
           </motion.div>
         )}

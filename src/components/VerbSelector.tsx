@@ -34,7 +34,6 @@ export function VerbSelector({
   const [isFormOpen, setIsFormOpen] = useState(false);
   
   const [inputText, setInputText] = useState("");
-  const [formDifficulty, setFormDifficulty] = useState<"Básico" | "Intermedio" | "Avanzado">("Básico");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -79,7 +78,7 @@ export function VerbSelector({
     });
 
     if (isDuplicate) {
-      setError(`La palabra "${capitalize(inputClean)}" ya existe en tu lista de prácticas.`);
+      setError(`La palabra "${capitalize(inputClean.replace(/^(to\s+)/i, ""))}" ya existe en tu lista de prácticas.`);
       return;
     }
 
@@ -95,7 +94,6 @@ export function VerbSelector({
         },
         body: JSON.stringify({
           inputText: inputClean,
-          difficulty: formDifficulty
         }),
       });
 
@@ -111,9 +109,9 @@ export function VerbSelector({
 
       const newVerb: VerbExercise = {
         id: "custom-" + Date.now(),
-        verbEN: capitalize(data.verbEN || inputClean),
+        verbEN: capitalize((data.verbEN || inputClean).replace(/^(to\s+)/i, "")),
         verbES: capitalize(data.verbES || "Cargado"),
-        difficulty: formDifficulty,
+        difficulty: data.difficulty || "Básico",
         isCustom: true,
         sentences: data.sentences.map((s: any) => ({
           ...s,
@@ -126,7 +124,6 @@ export function VerbSelector({
       
       // Reset form states
       setInputText("");
-      setFormDifficulty("Básico");
       setIsFormOpen(false);
       setIsOpen(false);
     } catch (err: any) {
@@ -415,21 +412,6 @@ export function VerbSelector({
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-white/50 block">
-                    Clasificación de Dificultad
-                  </label>
-                  <select
-                    value={formDifficulty}
-                    disabled={isGenerating}
-                    onChange={(e) => setFormDifficulty(e.target.value as any)}
-                    className="w-full bg-[#172138] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400 disabled:opacity-50 cursor-pointer"
-                  >
-                    <option value="Básico" className="bg-[#131b2e]">Básico</option>
-                    <option value="Intermedio" className="bg-[#131b2e]">Intermedio</option>
-                    <option value="Avanzado" className="bg-[#131b2e]">Avanzado</option>
-                  </select>
-                </div>
 
                 <div className="pt-2 flex justify-end gap-2">
                   <button

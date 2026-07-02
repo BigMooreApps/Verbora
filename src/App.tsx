@@ -215,7 +215,6 @@ export default function App() {
   const [showSplash, setShowSplash] = useState<boolean>(true);
   const [showWelcomeScreen, setShowWelcomeScreen] = useState<boolean>(false);
   const [welcomeInputText, setWelcomeInputText] = useState<string>("");
-  const [welcomeDifficulty, setWelcomeDifficulty] = useState<"Básico" | "Intermedio" | "Avanzado">("Básico");
   const [welcomeIsGenerating, setWelcomeIsGenerating] = useState<boolean>(false);
   const [welcomeError, setWelcomeError] = useState<string>("");
 
@@ -965,7 +964,7 @@ export default function App() {
                     };
 
                     if (isDuplicate) {
-                      setWelcomeError(`La palabra "${capitalize(inputClean)}" ya existe en tu lista de prácticas.`);
+                      setWelcomeError(`La palabra "${capitalize(inputClean.replace(/^(to\s+)/i, ""))}" ya existe en tu lista de prácticas.`);
                       return;
                     }
 
@@ -980,7 +979,6 @@ export default function App() {
                         },
                         body: JSON.stringify({
                           inputText: inputClean,
-                          difficulty: welcomeDifficulty
                         }),
                       });
                       if (!response.ok) {
@@ -994,9 +992,9 @@ export default function App() {
 
                       const newVerb: VerbExercise = {
                         id: "custom-" + Date.now(),
-                        verbEN: capitalize(data.verbEN || inputClean),
+                        verbEN: capitalize((data.verbEN || inputClean).replace(/^(to\s+)/i, "")),
                         verbES: capitalize(data.verbES || "Cargado"),
-                        difficulty: welcomeDifficulty,
+                        difficulty: data.difficulty || "Básico",
                         isCustom: true,
                         sentences: data.sentences.map((s: any) => ({
                           ...s,
@@ -1024,22 +1022,6 @@ export default function App() {
                       className="w-full bg-slate-950 border border-white/10 rounded-xl p-3.5 pr-12 text-white placeholder-white/30 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all text-sm font-medium"
                     />
                     <Sparkles className="absolute right-4 w-4 h-4 text-teal-400 pointer-events-none" />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold uppercase tracking-wider text-white/50 block">
-                      Clasificación de Dificultad
-                    </label>
-                    <select
-                      value={welcomeDifficulty}
-                      disabled={welcomeIsGenerating}
-                      onChange={(e) => setWelcomeDifficulty(e.target.value as any)}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 disabled:opacity-50 cursor-pointer"
-                    >
-                      <option value="Básico" className="bg-[#131b2e]">Básico</option>
-                      <option value="Intermedio" className="bg-[#131b2e]">Intermedio</option>
-                      <option value="Avanzado" className="bg-[#131b2e]">Avanzado</option>
-                    </select>
                   </div>
 
                   {welcomeError && (

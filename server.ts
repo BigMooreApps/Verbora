@@ -704,21 +704,11 @@ Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, the
       return res.json(resultJSON);
 
     } catch (error: any) {
-      console.error("Error generating tenses with Gemini, falling back to heuristic:", error);
-      try {
-        const fallbackSentences = generateFallbackTenses(req.body.inputText || "work", "Trabajar");
-        return res.json({
-          verbEN: req.body.inputText || "work",
-          verbES: "Trabajar",
-          difficulty: req.body.difficulty || "Básico",
-          sentences: fallbackSentences 
-        });
-      } catch (innerError) {
-        return res.status(500).json({
-          error: "GENERATION_FAILED",
-          message: "Error al generar los tiempos verbales para esta palabra.",
-        });
-      }
+      console.error("Error generating tenses with Gemini:", error);
+      return res.status(500).json({
+        error: "GENERATION_FAILED",
+        message: "Error de IA: Verifica que la API Key que configuraste sea válida (usualmente empieza con AIzaSy...) y tengas conexión. Detalle: " + (error.message || "Desconocido"),
+      });
     }
   });
 

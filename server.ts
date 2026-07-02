@@ -582,6 +582,8 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
         "work": { en: "work", es: "Trabajar", diff: "Básico" },
         "montar": { en: "ride", es: "Montar", diff: "Intermedio" },
         "ride": { en: "ride", es: "Montar", diff: "Intermedio" },
+        "manejar": { en: "drive", es: "Manejar", diff: "Básico" },
+        "drive": { en: "drive", es: "Manejar", diff: "Básico" },
       };
 
       const keyLower = inputClean.toLowerCase().replace(/^to\s+/i, "");
@@ -596,25 +598,19 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
           resolvedDiff = fallbackDict[keyLower].diff;
         }
       } else {
-        // If not in dict, guess if Spanish or English
-        const endsWithArErIr = /ar$|er$|ir$/i.test(inputClean);
-        if (endsWithArErIr) {
-          resolvedES = inputClean;
-          resolvedEN = inputClean.replace(/ar$|er$|ir$/i, ""); // simple guess
-        } else {
-          resolvedEN = inputClean;
-          resolvedES = inputClean;
-        }
+        // We cannot reliably guess translations for unknown words.
+        resolvedEN = inputClean;
+        resolvedES = inputClean;
       }
 
       // If GEMINI_API_KEY is not defined, immediately use highly robust fallback tenses
       const apiKey = req.headers["x-gemini-api-key"] || process.env.GEMINI_API_KEY;
       if (!apiKey) {
-        // If we don't know the exact translation and it's not a clear Spanish verb, prevent Spanglish translations
-        if (!fallbackDict[keyLower] && !/ar$|er$|ir$/i.test(inputClean)) {
+        // If we don't know the exact translation, prevent Spanglish translations completely
+        if (!fallbackDict[keyLower]) {
           return res.status(400).json({
             error: "GEMINI_API_KEY_MISSING",
-            message: `Para traducir palabras nuevas como "${inputClean}" correctamente, necesitas configurar tu API Key de Gemini en el botón de ajustes.`
+            message: `Para traducir palabras nuevas como "${inputClean}" correctamente al inglés americano, necesitas configurar tu API Key de Gemini en el botón de ajustes.`
           });
         }
         console.log("No GEMINI_API_KEY found, using robust fallback generator.");

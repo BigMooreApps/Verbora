@@ -639,7 +639,8 @@ Reglas importantes:
 - Si el usuario especificó una dificultad, usa esa, sino selecciona de manera inteligente ("Básico", "Intermedio" o "Avanzado").
 - Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, they) entre las 12 oraciones para que la práctica sea rica y abarque todas las personas gramaticales.
 - Las oraciones deben ser cortas, claras, gramaticalmente correctas y apropiadas para practicar pronunciación.
-- Para cada oración, proporciona una traducción exacta y natural al español, así como un consejo fonético corto de gran utilidad escrito en español para el participante.`;
+- Para cada oración, proporciona una traducción de NIVEL PROFESIONAL al español latino / español de América (evitando términos específicos de España como "vosotros", etc.). La traducción debe ser sumamente natural, fluida y exacta, respetando al 100% el significado de la oración original, y adaptada a la cultura latinoamericana.
+- Proporciona también un consejo fonético corto de gran utilidad escrito en español para el participante.`;
 
       const prompt = `Analiza y genera los 12 tiempos verbales para la siguiente entrada: "${inputClean}".
 Asegúrate de incluir exactamente los siguientes 12 tiempos en el orden estándar:

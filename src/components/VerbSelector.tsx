@@ -78,7 +78,8 @@ export function VerbSelector({
       });
 
       if (!response.ok) {
-        throw new Error("No se pudo conectar con el servidor para la generación.");
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || "No se pudo conectar con el servidor para la generación.");
       }
 
       const data = await response.json();

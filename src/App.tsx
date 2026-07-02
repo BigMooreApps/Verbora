@@ -495,27 +495,27 @@ function convertTipToSubject(tip: string, tenseId: string, subject: string): str
 }
 
 const slideVariants = {
-  enter: (direction: 'up' | 'down') => ({
-    y: direction === 'up' ? 80 : -80,
+  enter: (direction: 'left' | 'right') => ({
+    x: direction === 'left' ? 100 : -100,
     opacity: 0,
     scale: 0.98
   }),
   center: {
-    y: 0,
+    x: 0,
     opacity: 1,
     scale: 1,
     transition: {
-      y: { type: 'spring', stiffness: 280, damping: 26 },
+      x: { type: 'spring', stiffness: 280, damping: 26 },
       opacity: { duration: 0.2 },
       scale: { duration: 0.2 }
     }
   },
-  exit: (direction: 'up' | 'down') => ({
-    y: direction === 'up' ? -80 : 80,
+  exit: (direction: 'left' | 'right') => ({
+    x: direction === 'left' ? -100 : 100,
     opacity: 0,
     scale: 0.98,
     transition: {
-      y: { type: 'spring', stiffness: 280, damping: 26 },
+      x: { type: 'spring', stiffness: 280, damping: 26 },
       opacity: { duration: 0.15 },
       scale: { duration: 0.15 }
     }
@@ -574,7 +574,7 @@ export default function App() {
   const [welcomeInputText, setWelcomeInputText] = useState<string>("");
   const [welcomeIsGenerating, setWelcomeIsGenerating] = useState<boolean>(false);
   const [welcomeError, setWelcomeError] = useState<string>("");
-  const [slideDirection, setSlideDirection] = useState<'up' | 'down'>('up');
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('left');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -1235,10 +1235,10 @@ export default function App() {
     const diffY = touchStartY.current - e.changedTouches[0].clientY;
     const diffX = touchStartX.current - e.changedTouches[0].clientX;
 
-    const threshold = 55; // swipe sensitivity threshold
-    // Vertical swipe check (y diff is larger than x diff and exceeds threshold)
-    if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > threshold) {
-      if (diffY > 0) {
+    const threshold = 40; // swipe sensitivity threshold
+    // Horizontal swipe check (x diff is larger than y diff and exceeds threshold)
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > threshold) {
+      if (diffX > 0) {
         handleNextTense();
       } else {
         handlePrevTense();
@@ -1251,12 +1251,12 @@ export default function App() {
 
   // --- Navigation Controls ---
   const handlePrevTense = () => {
-    setSlideDirection('down');
+    setSlideDirection('right');
     setCurrentTenseIndex((prev) => (prev > 0 ? prev - 1 : activeVerb.sentences.length - 1));
   };
 
   const handleNextTense = () => {
-    setSlideDirection('up');
+    setSlideDirection('left');
     setCurrentTenseIndex((prev) => (prev < activeVerb.sentences.length - 1 ? prev + 1 : 0));
   };
 

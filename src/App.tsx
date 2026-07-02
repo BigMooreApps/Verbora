@@ -339,13 +339,16 @@ function conjugateSpanishFuture(verbES: string, subject: string): string {
 
 function convertSpanishFromYoToSubject(translation: string, tenseId: string, verbES: string, subject: string): string {
   if (tenseId === "simple-present") {
-    return `${subject} ${conjugateSpanishPresent(verbES, subject)}`;
+    const rest = translation.replace(/^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+\w+/i, "").trim();
+    return `${subject} ${conjugateSpanishPresent(verbES, subject)}${rest ? " " + rest : ""}`;
   }
   if (tenseId === "simple-past") {
-    return `${subject} ${conjugateSpanishPast(verbES, subject)}`;
+    const rest = translation.replace(/^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+\w+/i, "").trim();
+    return `${subject} ${conjugateSpanishPast(verbES, subject)}${rest ? " " + rest : ""}`;
   }
   if (tenseId === "simple-future") {
-    return `${subject} ${conjugateSpanishFuture(verbES, subject)}`;
+    const rest = translation.replace(/^(Yo|Tú|Él|Ella|Nosotros|Ellos|Ellas)\s+\w+/i, "").trim();
+    return `${subject} ${conjugateSpanishFuture(verbES, subject)}${rest ? " " + rest : ""}`;
   }
 
   let t = translation;
@@ -353,53 +356,52 @@ function convertSpanishFromYoToSubject(translation: string, tenseId: string, ver
   
   if (subject === "Tú") {
     t = t.replace(matchPronouns, "Tú ");
-    t = t.replace(/\b(estoy|está|estamos|están)\b/gi, "estás");
-    t = t.replace(/\b(estaba|estábamos|estaban)\b/gi, "estabas");
-    t = t.replace(/\b(he|ha|hemos|han)\b/gi, "has");
-    t = t.replace(/\b(había|habíamos|habían)\b/gi, "habías");
-    t = t.replace(/\b(estaré|estará|estaremos|estarán)\b/gi, "estarás");
-    t = t.replace(/\b(habré|habrá|habremos|habrán)\b/gi, "habrás");
-    t = t.replace(/\b(estaría|estaríamos|estarían)\b/gi, "estarías");
-    t = t.replace(/\b(\w+)(aría|ería|iría)\b/gi, (_, stem) => `${stem}arías`);
+    t = t.replace(/(^|\s)(estoy|está|estamos|están)(\s|$)/gi, "$1estás$3");
+    t = t.replace(/(^|\s)(estaba|estábamos|estaban)(\s|$)/gi, "$1estabas$3");
+    t = t.replace(/(^|\s)(he|ha|hemos|han)(\s|$)/gi, "$1has$3");
+    t = t.replace(/(^|\s)(había|habíamos|habían)(\s|$)/gi, "$1habías$3");
+    t = t.replace(/(^|\s)(estaré|estará|estaremos|estarán)(\s|$)/gi, "$1estarás$3");
+    t = t.replace(/(^|\s)(habré|habrá|habremos|habrán)(\s|$)/gi, "$1habrás$3");
+    t = t.replace(/(^|\s)(estaría|estaríamos|estarían)(\s|$)/gi, "$1estarías$3");
+    t = t.replace(/(^|\s)(\w+)(aría|ería|iría)(\s|$)/gi, "$1$2$3s$4");
   } else if (subject === "Él" || subject === "Ella") {
     t = t.replace(matchPronouns, `${subject} `);
-    t = t.replace(/\b(estoy|estás|estamos|están)\b/gi, "está");
-    t = t.replace(/\b(estaba|estabas|estábamos|estaban)\b/gi, "estaba");
-    t = t.replace(/\b(he|has|hemos|han)\b/gi, "ha");
-    t = t.replace(/\b(había|habías|habíamos|habían)\b/gi, "había");
-    t = t.replace(/\b(estaré|estarás|estaremos|estarán)\b/gi, "estará");
-    t = t.replace(/\b(habré|habrás|habremos|habrán)\b/gi, "habrá");
-    t = t.replace(/\b(estaría|estarías|estaríamos|estarían)\b/gi, "estaría");
-    t = t.replace(/\b(\w+)(aría|ería|iría)\b/gi, (_, stem) => `${stem}aría`);
+    t = t.replace(/(^|\s)(estoy|estás|estamos|están)(\s|$)/gi, "$1está$3");
+    t = t.replace(/(^|\s)(estaba|estabas|estábamos|estaban)(\s|$)/gi, "$1estaba$3");
+    t = t.replace(/(^|\s)(he|has|hemos|han)(\s|$)/gi, "$1ha$3");
+    t = t.replace(/(^|\s)(había|habías|habíamos|habían)(\s|$)/gi, "$1había$3");
+    t = t.replace(/(^|\s)(estaré|estarás|estaremos|estarán)(\s|$)/gi, "$1estará$3");
+    t = t.replace(/(^|\s)(habré|habrás|habremos|habrán)(\s|$)/gi, "$1habrá$3");
+    t = t.replace(/(^|\s)(estaría|estarías|estaríamos|estarían)(\s|$)/gi, "$1estaría$3");
   } else if (subject === "Nosotros") {
     t = t.replace(matchPronouns, "Nosotros ");
-    t = t.replace(/\b(estoy|estás|está|están)\b/gi, "estamos");
-    t = t.replace(/\b(estaba|estabas|estaban)\b/gi, "estábamos");
-    t = t.replace(/\b(he|has|ha|han)\b/gi, "hemos");
-    t = t.replace(/\b(había|habías|habían)\b/gi, "habíamos");
-    t = t.replace(/\b(estaré|estarás|estará|estarán)\b/gi, "estaremos");
-    t = t.replace(/\b(habré|habrás|habrá|habrán)\b/gi, "habremos");
-    t = t.replace(/\b(estaría|estarías|estarían)\b/gi, "estaríamos");
-    t = t.replace(/\b(\w+)(aría|ería|iría)\b/gi, (_, stem) => `${stem}aríamos`);
+    t = t.replace(/(^|\s)(estoy|estás|está|están)(\s|$)/gi, "$1estamos$3");
+    t = t.replace(/(^|\s)(estaba|estabas|estaban)(\s|$)/gi, "$1estábamos$3");
+    t = t.replace(/(^|\s)(he|has|ha|han)(\s|$)/gi, "$1hemos$3");
+    t = t.replace(/(^|\s)(había|habías|habían)(\s|$)/gi, "$1habíamos$3");
+    t = t.replace(/(^|\s)(estaré|estarás|estará|estarán)(\s|$)/gi, "$1estaremos$3");
+    t = t.replace(/(^|\s)(habré|habrás|habrá|habrán)(\s|$)/gi, "$1habremos$3");
+    t = t.replace(/(^|\s)(estaría|estarías|estarían)(\s|$)/gi, "$1estaríamos$3");
+    t = t.replace(/(^|\s)(\w+)(aría|ería|iría)(\s|$)/gi, "$1$2$3mos$4");
   } else if (subject === "Ellos" || subject === "Ellas") {
     t = t.replace(matchPronouns, `${subject} `);
-    t = t.replace(/\b(estoy|estás|está|estamos)\b/gi, "están");
-    t = t.replace(/\b(estaba|estabas|estábamos)\b/gi, "estaban");
-    t = t.replace(/\b(he|has|ha|hemos)\b/gi, "han");
-    t = t.replace(/\b(había|habías|habíamos)\b/gi, "habían");
-    t = t.replace(/\b(estaré|estarás|estará|estaremos)\b/gi, "estarán");
-    t = t.replace(/\b(habré|habrás|habrá|habremos)\b/gi, "habrán");
-    t = t.replace(/\b(estaría|estarías|estaríamos)\b/gi, "estarían");
-    t = t.replace(/\b(\w+)(aría|ería|iría)\b/gi, (_, stem) => `${stem}arían`);
+    t = t.replace(/(^|\s)(estoy|estás|está|estamos)(\s|$)/gi, "$1están$3");
+    t = t.replace(/(^|\s)(estaba|estabas|estaba|estábamos)(\s|$)/gi, "$1estaban$3");
+    t = t.replace(/(^|\s)(he|has|ha|hemos)(\s|$)/gi, "$1han$3");
+    t = t.replace(/(^|\s)(había|habías|había|habíamos)(\s|$)/gi, "$1habían$3");
+    t = t.replace(/(^|\s)(estaré|estarás|estará|estaremos)(\s|$)/gi, "$1estarán$3");
+    t = t.replace(/(^|\s)(habré|habrás|habrá|habremos)(\s|$)/gi, "$1habrán$3");
+    t = t.replace(/(^|\s)(estaría|estarías|estaría|estaríamos)(\s|$)/gi, "$1estarían$3");
+    t = t.replace(/(^|\s)(\w+)(aría|ería|iría)(\s|$)/gi, "$1$2$3n$4");
   } else if (subject === "Yo") {
     t = t.replace(matchPronouns, "Yo ");
-    t = t.replace(/\b(estás|está|estamos|están)\b/gi, "estoy");
-    t = t.replace(/\b(estabas|estaba|estábamos|estaban)\b/gi, "estaba");
-    t = t.replace(/\b(has|ha|hemos|han)\b/gi, "he");
-    t = t.replace(/\b(habías|había|habíamos|habían)\b/gi, "había");
-    t = t.replace(/\b(estarás|estará|estaremos|estarán)\b/gi, "estaré");
-    t = t.replace(/\b(habrás|habrá|habremos|habrán)\b/gi, "habré");
-    t = t.replace(/\b(estarías|estaría|estaríamos|estarían)\b/gi, "estaría");
+    t = t.replace(/(^|\s)(estás|está|estamos|están)(\s|$)/gi, "$1estoy$3");
+    t = t.replace(/(^|\s)(estabas|estaba|estábamos|estaban)(\s|$)/gi, "$1estaba$3");
+    t = t.replace(/(^|\s)(has|ha|hemos|han)(\s|$)/gi, "$1he$3");
+    t = t.replace(/(^|\s)(habías|había|habíamos|habían)(\s|$)/gi, "$1había$3");
+    t = t.replace(/(^|\s)(estarás|estará|estaremos|estarán)(\s|$)/gi, "$1estaré$3");
+    t = t.replace(/(^|\s)(habrás|habrá|habremos|habrán)(\s|$)/gi, "$1habré$3");
+    t = t.replace(/(^|\s)(estarías|estaría|estaríamos|estarían)(\s|$)/gi, "$1estaría$3");
   }
 
   return t;

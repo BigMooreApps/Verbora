@@ -739,6 +739,13 @@ export default function App() {
 
   const activeSentence = useMemo(() => {
     if (useAllSubjects) {
+      if (rawActiveSentence.sentenceAll && rawActiveSentence.translationAll) {
+        return {
+          ...rawActiveSentence,
+          sentence: rawActiveSentence.sentenceAll,
+          translation: rawActiveSentence.translationAll
+        };
+      }
       const SUBJECTS_EN = ["I", "You", "He", "She", "We", "They"];
       const SUBJECTS_ES = ["Yo", "Tú", "Él", "Ella", "Nosotros", "Ellos"];
       const subjectIdx = currentTenseIndex % 6;
@@ -750,6 +757,14 @@ export default function App() {
         sentence: convertEnglishFromIToSubject(rawActiveSentence.sentence, rawActiveSentence.tenseId, activeVerb.verbEN, targetSubjectEN),
         translation: convertSpanishFromYoToSubject(rawActiveSentence.translation, rawActiveSentence.tenseId, activeVerb.verbES, targetSubjectES),
         pronunciationTip: convertTipToSubject(rawActiveSentence.pronunciationTip, rawActiveSentence.tenseId, targetSubjectEN)
+      };
+    }
+
+    if (rawActiveSentence.sentenceI && rawActiveSentence.translationI) {
+      return {
+        ...rawActiveSentence,
+        sentence: rawActiveSentence.sentenceI,
+        translation: rawActiveSentence.translationI
       };
     }
     return {

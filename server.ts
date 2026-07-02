@@ -632,14 +632,16 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
       const systemInstruction = `Eres un experto lingüista y profesor de inglés para hispanohablantes. 
 Tu tarea es tomar una entrada en texto (que puede ser un verbo, palabra o frase corta en inglés o español), analizarla, determinar su infinitivo o forma base correcta en inglés y su traducción correcta al español, determinar su nivel de dificultad ("Básico", "Intermedio" o "Avanzado"), y generar una lista de EXACTAMENTE 12 oraciones de ejemplo (una para cada uno de los 12 tiempos verbales de la gramática inglesa) usando esa palabra/verbo de forma natural.
 
-Reglas importantes:
+Reglas importantes para cada uno de los 12 tiempos verbales:
+- Debes generar DOS versiones completas para cada oración y su traducción:
+  1. Versión Primera Persona (I / Yo): La oración en inglés debe usar estrictamente el sujeto "I" y la traducción al español debe usar el pronombre "Yo" y su verbo correspondiente conjugado a primera persona.
+  2. Versión Sujeto Variado (Todos los Sujetos): La oración en inglés debe usar un sujeto variado (ej: You, He, She, We, They, etc. distribuidos rotativamente a lo largo de las 12 oraciones) y la traducción al español debe usar el pronombre correspondiente y conjugarlo de manera perfectamente natural y gramaticalmente correcta.
 - La entrada puede estar en inglés o español. Debes traducirla correctamente.
 - Determina la forma infinitiva del verbo en inglés para el campo "verbEN" (ej: si escriben "hablar", el verbEN es "Speak" o "To speak").
 - Determina la traducción correcta para el campo "verbES" (ej: "Hablar").
 - Si el usuario especificó una dificultad, usa esa, sino selecciona de manera inteligente ("Básico", "Intermedio" o "Avanzado").
-- Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, they) entre las 12 oraciones para que la práctica sea rica y abarque todas las personas gramaticales.
-- Las oraciones deben ser cortas, claras, gramaticalmente correctas y apropiadas para practicar pronunciación.
-- Para cada oración, proporciona una traducción de NIVEL PROFESIONAL al español latino / español de América (evitando términos específicos de España como "vosotros", etc.). La traducción debe ser sumamente natural, fluida y exacta, respetando al 100% el significado de la oración original, y adaptada a la cultura latinoamericana.
+- Las oraciones deben ser cortas, claras, y representar situaciones cotidianas y reales de forma coherente y natural (evitando ejemplos forzados).
+- Para todas las traducciones, proporciona una traducción de NIVEL PROFESIONAL al español latino / español de América (evitando términos específicos de España como "vosotros", etc.). La traducción debe ser sumamente natural, fluida y exacta, respetando al 100% el significado de la oración original, y adaptada a la cultura latinoamericana.
 - Evita traducciones literales o palabra por palabra si suenan poco naturales en español de América. Por ejemplo, en lugar de traducir "ride" como "montar" a secas (que suena incompleto), tradúcelo contextualmente de forma coherente según la frase (ej: "montar en bicicleta", "pasear a caballo", "manejar", etc.). Todas las oraciones deben reflejar situaciones de la vida real de manera coherente y natural.
 - Proporciona también un consejo fonético corto de gran utilidad escrito en español para el participante.`;
 
@@ -659,7 +661,7 @@ Asegúrate de incluir exactamente los siguientes 12 tiempos en el orden estánda
 12. FUTURE PERFECT CONTINUOUS (Futuro Perfecto Continuo)
 
 Dificultad preferida (si se proporcionó): "${difficulty || 'auto'}".
-Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, they) entre las 12 oraciones para que la práctica sea dinámica y abarque todos los pronombres.`;
+Distribuye variadamente diferentes sujetos (You, He, She, We, They, etc.) para los campos 'sentenceAll' y 'translationAll' de forma rotativa.`;
 
       const responseSchema = {
         type: "OBJECT",
@@ -672,17 +674,18 @@ Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, the
             items: {
               type: "OBJECT",
               properties: {
-                tenseId: { 
-                  type: "STRING", 
-                  description: "Identificador único de tiempo verbal en minúsculas con guiones." 
-                },
+                tenseId: { type: "STRING", description: "Identificador único de tiempo verbal en minúsculas con guiones." },
                 tenseNameEN: { type: "STRING", description: "Nombre del tiempo verbal en inglés en mayúsculas." },
                 tenseNameES: { type: "STRING", description: "Nombre del tiempo verbal en español." },
-                sentence: { type: "STRING", description: "La oración completa en inglés." },
-                translation: { type: "STRING", description: "Traducción exacta de la oración al español." },
-                pronunciationTip: { type: "STRING", description: "Un consejo práctico de pronunciación fonética simplificada en español." }
+                sentence: { type: "STRING", description: "La oración completa en inglés (igual a sentenceI)." },
+                translation: { type: "STRING", description: "Traducción al español de la oración (igual a translationI)." },
+                pronunciationTip: { type: "STRING", description: "Un consejo práctico de pronunciación fonética simplificada en español." },
+                sentenceI: { type: "STRING", description: "La oración completa en inglés usando el sujeto 'I'." },
+                translationI: { type: "STRING", description: "Traducción profesional al español latino usando el sujeto 'Yo'." },
+                sentenceAll: { type: "STRING", description: "La oración completa en inglés usando un sujeto variado (ej: You, He, She, We, They)." },
+                translationAll: { type: "STRING", description: "Traducción profesional al español latino usando el sujeto variado correspondiente." }
               },
-              required: ["tenseId", "tenseNameEN", "tenseNameES", "sentence", "translation", "pronunciationTip"],
+              required: ["tenseId", "tenseNameEN", "tenseNameES", "sentence", "translation", "pronunciationTip", "sentenceI", "translationI", "sentenceAll", "translationAll"],
             },
             description: "Lista de exactamente 12 tiempos verbales principales en inglés."
           }

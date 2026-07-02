@@ -5,6 +5,10 @@ export interface TenseSentence {
   sentence: string;
   translation: string;
   pronunciationTip?: string;
+  sentenceI?: string;
+  translationI?: string;
+  sentenceAll?: string;
+  translationAll?: string;
 }
 
 export interface VerbExercise {

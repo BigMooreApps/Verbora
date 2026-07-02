@@ -302,6 +302,10 @@ export function VerbSelector({
                         {/* Right Actions */}
                         <div className="flex items-center gap-2 shrink-0">
                           
+                          {isSelected && (
+                            <Check className="w-4 h-4 text-teal-400" />
+                          )}
+
                           {item.isCustom && (
                             <button
                               type="button"
@@ -314,10 +318,6 @@ export function VerbSelector({
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
-                          )}
-
-                          {isSelected && (
-                            <Check className="w-4 h-4 text-teal-400 ml-1" />
                           )}
                         </div>
                       </div>

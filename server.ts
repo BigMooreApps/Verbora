@@ -90,6 +90,9 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
             temperature: 0.15,
             responseMimeType: "application/json",
             responseSchema,
+            thinkingConfig: {
+              thinkingBudget: 0
+            }
           },
         }),
       });
@@ -699,6 +702,9 @@ Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, the
             temperature: 0.2,
             responseMimeType: "application/json",
             responseSchema,
+            thinkingConfig: {
+              thinkingBudget: 0
+            }
           }
         })
       });

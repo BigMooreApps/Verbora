@@ -215,6 +215,7 @@ export default function App() {
   const [showSplash, setShowSplash] = useState<boolean>(true);
   const [showWelcomeScreen, setShowWelcomeScreen] = useState<boolean>(false);
   const [welcomeInputText, setWelcomeInputText] = useState<string>("");
+  const [welcomeDifficulty, setWelcomeDifficulty] = useState<"Básico" | "Intermedio" | "Avanzado">("Básico");
   const [welcomeIsGenerating, setWelcomeIsGenerating] = useState<boolean>(false);
   const [welcomeError, setWelcomeError] = useState<string>("");
 
@@ -942,10 +943,32 @@ export default function App() {
                   onSubmit={async (e) => {
                     e.preventDefault();
                     setWelcomeError("");
-                    if (!welcomeInputText.trim()) {
+
+                    const inputClean = welcomeInputText.trim();
+                    if (!inputClean) {
                       setWelcomeError("Por favor ingresa una palabra.");
                       return;
                     }
+
+                    // Duplicate Check
+                    const cleanCompare = inputClean.toLowerCase().replace(/^to\s+/i, "");
+                    const isDuplicate = exercises.some((ex) => {
+                      const exEN = ex.verbEN.toLowerCase().replace(/^to\s+/i, "");
+                      const exES = ex.verbES.toLowerCase();
+                      return exEN === cleanCompare || exES === cleanCompare;
+                    });
+
+                    const capitalize = (s: string) => {
+                      const trimmed = s.trim();
+                      if (!trimmed) return "";
+                      return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+                    };
+
+                    if (isDuplicate) {
+                      setWelcomeError(`La palabra "${capitalize(inputClean)}" ya existe en tu lista de prácticas.`);
+                      return;
+                    }
+
                     setWelcomeIsGenerating(true);
                     try {
                       const userApiKey = localStorage.getItem("geminiApiKey") || "";
@@ -956,7 +979,8 @@ export default function App() {
                           ...(userApiKey ? { "x-gemini-api-key": userApiKey } : {})
                         },
                         body: JSON.stringify({
-                          inputText: welcomeInputText.trim(),
+                          inputText: inputClean,
+                          difficulty: welcomeDifficulty
                         }),
                       });
                       if (!response.ok) {
@@ -967,13 +991,18 @@ export default function App() {
                       if (!data.sentences || data.sentences.length === 0) {
                         throw new Error("No se generó el conjunto de tiempos verbales.");
                       }
+
                       const newVerb: VerbExercise = {
                         id: "custom-" + Date.now(),
-                        verbEN: data.verbEN || welcomeInputText.trim(),
-                        verbES: data.verbES || "Cargado",
-                        difficulty: data.difficulty || "Básico",
+                        verbEN: capitalize(data.verbEN || inputClean),
+                        verbES: capitalize(data.verbES || "Cargado"),
+                        difficulty: welcomeDifficulty,
                         isCustom: true,
-                        sentences: data.sentences,
+                        sentences: data.sentences.map((s: any) => ({
+                          ...s,
+                          sentence: capitalize(s.sentence),
+                          translation: capitalize(s.translation)
+                        })),
                       };
                       handleAddVerb(newVerb);
                       setShowWelcomeScreen(false);
@@ -995,6 +1024,22 @@ export default function App() {
                       className="w-full bg-slate-950 border border-white/10 rounded-xl p-3.5 pr-12 text-white placeholder-white/30 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all text-sm font-medium"
                     />
                     <Sparkles className="absolute right-4 w-4 h-4 text-teal-400 pointer-events-none" />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-wider text-white/50 block">
+                      Clasificación de Dificultad
+                    </label>
+                    <select
+                      value={welcomeDifficulty}
+                      disabled={welcomeIsGenerating}
+                      onChange={(e) => setWelcomeDifficulty(e.target.value as any)}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 disabled:opacity-50 cursor-pointer"
+                    >
+                      <option value="Básico" className="bg-[#131b2e]">Básico</option>
+                      <option value="Intermedio" className="bg-[#131b2e]">Intermedio</option>
+                      <option value="Avanzado" className="bg-[#131b2e]">Avanzado</option>
+                    </select>
                   </div>
 
                   {welcomeError && (

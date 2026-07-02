@@ -34,6 +34,7 @@ export function VerbSelector({
   const [isFormOpen, setIsFormOpen] = useState(false);
   
   const [inputText, setInputText] = useState("");
+  const [formDifficulty, setFormDifficulty] = useState<"Básico" | "Intermedio" | "Avanzado">("Básico");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -53,12 +54,32 @@ export function VerbSelector({
     }
   };
 
+  const capitalize = (s: string) => {
+    const trimmed = s.trim();
+    if (!trimmed) return "";
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!inputText.trim()) {
+    const inputClean = inputText.trim();
+    if (!inputClean) {
       setError("Por favor ingresa un verbo, palabra o frase corta.");
+      return;
+    }
+
+    // Duplicate Check
+    const cleanCompare = inputClean.toLowerCase().replace(/^to\s+/i, "");
+    const isDuplicate = exercises.some((ex) => {
+      const exEN = ex.verbEN.toLowerCase().replace(/^to\s+/i, "");
+      const exES = ex.verbES.toLowerCase();
+      return exEN === cleanCompare || exES === cleanCompare;
+    });
+
+    if (isDuplicate) {
+      setError(`La palabra "${capitalize(inputClean)}" ya existe en tu lista de prácticas.`);
       return;
     }
 
@@ -73,7 +94,8 @@ export function VerbSelector({
           ...(userApiKey ? { "x-gemini-api-key": userApiKey } : {})
         },
         body: JSON.stringify({
-          inputText: inputText.trim(),
+          inputText: inputClean,
+          difficulty: formDifficulty
         }),
       });
 
@@ -89,17 +111,22 @@ export function VerbSelector({
 
       const newVerb: VerbExercise = {
         id: "custom-" + Date.now(),
-        verbEN: data.verbEN || inputText.trim(),
-        verbES: data.verbES || "Cargado",
-        difficulty: data.difficulty || "Básico",
+        verbEN: capitalize(data.verbEN || inputClean),
+        verbES: capitalize(data.verbES || "Cargado"),
+        difficulty: formDifficulty,
         isCustom: true,
-        sentences: data.sentences,
+        sentences: data.sentences.map((s: any) => ({
+          ...s,
+          sentence: capitalize(s.sentence),
+          translation: capitalize(s.translation)
+        })),
       };
 
       onAddVerb(newVerb);
       
       // Reset form states
       setInputText("");
+      setFormDifficulty("Básico");
       setIsFormOpen(false);
       setIsOpen(false);
     } catch (err: any) {
@@ -386,6 +413,22 @@ export function VerbSelector({
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400 disabled:opacity-50"
                     autoFocus
                   />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-white/50 block">
+                    Clasificación de Dificultad
+                  </label>
+                  <select
+                    value={formDifficulty}
+                    disabled={isGenerating}
+                    onChange={(e) => setFormDifficulty(e.target.value as any)}
+                    className="w-full bg-[#172138] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400 disabled:opacity-50 cursor-pointer"
+                  >
+                    <option value="Básico" className="bg-[#131b2e]">Básico</option>
+                    <option value="Intermedio" className="bg-[#131b2e]">Intermedio</option>
+                    <option value="Avanzado" className="bg-[#131b2e]">Avanzado</option>
+                  </select>
                 </div>
 
                 <div className="pt-2 flex justify-end gap-2">

@@ -76,7 +76,7 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
         required: ["accuracyScore", "feedback", "phoneticGuide", "details"],
       };
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
+      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent`;
       const result = await fetch(url, {
         method: "POST",
         headers: {
@@ -84,12 +84,12 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
           "x-goog-api-key": (apiKey as string).trim(),
         },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemInstruction }] },
+          system_instruction: { parts: [{ text: systemInstruction }] },
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
+          generation_config: {
             temperature: 0.15,
-            responseMimeType: "application/json",
-            responseSchema,
+            response_mime_type: "application/json",
+            response_schema: responseSchema,
           },
         }),
       });
@@ -685,7 +685,7 @@ Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, the
         required: ["verbEN", "verbES", "difficulty", "sentences"]
       };
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
+      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent`;
       const result = await fetch(url, {
         method: "POST",
         headers: { 
@@ -693,12 +693,12 @@ Distribuye aleatoria y variadamente diferentes sujetos (I, you, he, she, we, the
           "x-goog-api-key": (apiKey as string).trim()
         },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemInstruction }] },
+          system_instruction: { parts: [{ text: systemInstruction }] },
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
+          generation_config: {
             temperature: 0.2,
-            responseMimeType: "application/json",
-            responseSchema,
+            response_mime_type: "application/json",
+            response_schema: responseSchema,
           }
         })
       });

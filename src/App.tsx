@@ -239,6 +239,7 @@ export default function App() {
   const [ttsWarning, setTtsWarning] = useState<string | null>(null);
   const [userApiKey, setUserApiKey] = useState<string>(() => localStorage.getItem("geminiApiKey") || "");
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
+  const [highlightApiKey, setHighlightApiKey] = useState<boolean>(false);
 
   const saveApiKey = (key: string) => {
     setUserApiKey(key);
@@ -515,7 +516,8 @@ export default function App() {
 
     if (isGeminiVoice) {
       if (!userApiKey) {
-        setIsApiKeyModalOpen(true);
+        setHighlightApiKey(true);
+        setTimeout(() => setHighlightApiKey(false), 2500);
         fallbackSpeechSynthesis(text);
         return;
       }
@@ -895,13 +897,19 @@ export default function App() {
           
           <div className="flex items-center gap-1.5 shrink-0">
             {/* API Key Button */}
-            <button
+            <motion.button
+              animate={highlightApiKey ? { scale: [1, 1.15, 1, 1.15, 1], rotate: [0, -10, 10, -10, 0] } : {}}
+              transition={{ duration: 0.5 }}
               onClick={() => setIsApiKeyModalOpen(true)}
-              className="p-1.5 sm:p-2 rounded-xl bg-gradient-to-r from-violet-600/15 via-blue-500/15 to-teal-500/15 hover:from-violet-600/25 hover:via-blue-500/25 hover:to-teal-500/25 border border-blue-500/30 hover:border-blue-500/50 text-white/90 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer select-none shadow-sm"
+              className={`p-1.5 sm:p-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer select-none shadow-sm ${
+                highlightApiKey 
+                  ? "bg-amber-500/30 border border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)] text-amber-200" 
+                  : "bg-gradient-to-r from-violet-600/15 via-blue-500/15 to-teal-500/15 hover:from-violet-600/25 hover:via-blue-500/25 hover:to-teal-500/25 border border-blue-500/30 hover:border-blue-500/50 text-white/90 hover:text-white"
+              }`}
               title="Configurar API Key"
             >
               {userApiKey ? <Key className="w-4 h-4 text-teal-400" /> : <AlertTriangle className="w-4 h-4 text-amber-400" />}
-            </button>
+            </motion.button>
             {/* Configuration Button */}
             <button
               onClick={() => setIsConfigOpen(true)}
@@ -1457,7 +1465,7 @@ export default function App() {
                 
                 <div className="space-y-3">
                   <p className="text-sm text-white/60">
-                    Ingresa tu API Key de Gemini para activar las voces ultrarrealistas y las evaluaciones avanzadas por IA.
+                    Ingresa tu API Key (Gemini, ChatGPT u otros compatibles) para activar las voces ultrarrealistas y las evaluaciones avanzadas por IA.
                   </p>
                   <input
                     type="password"

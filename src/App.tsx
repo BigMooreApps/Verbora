@@ -1352,14 +1352,6 @@ export default function App() {
                     </div>
                   )}
       
-                  <AnimatePresence mode="wait">
-                    {analysisResult && (
-                      <PronunciationDetails 
-                        result={analysisResult} 
-                        expectedSentence={activeSentence.sentence} 
-                      />
-                    )}
-                  </AnimatePresence>
                 </div>
               </motion.div>
             </AnimatePresence>
@@ -1456,6 +1448,62 @@ export default function App() {
           </span>
         </div>
  
+
+        {/* MODAL EMERGENTE DE RETROALIMENTACIÓN DE PRONUNCIACIÓN */}
+        <AnimatePresence>
+          {analysisResult && (
+            <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setAnalysisResult(null)}
+                className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+              />
+
+              {/* Modal Body */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                className="relative w-full max-w-lg max-h-[85vh] flex flex-col bg-[#131b2e] border border-white/15 rounded-3xl shadow-2xl overflow-hidden z-10 text-left"
+              >
+                {/* Header */}
+                <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5 shrink-0">
+                  <div className="flex items-center gap-1.5">
+                    <Star className="w-4 h-4 text-teal-400" />
+                    <h3 className="text-sm font-bold text-white tracking-wide">Retroalimentación del Tutor</h3>
+                  </div>
+                  <button
+                    onClick={() => setAnalysisResult(null)}
+                    className="p-1 text-white/40 hover:text-white/80 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Details Container with scroll */}
+                <div className="p-5 overflow-y-auto flex-1 space-y-4 scrollbar-thin">
+                  <PronunciationDetails 
+                    result={analysisResult} 
+                    expectedSentence={activeSentence.sentence} 
+                  />
+                </div>
+
+                {/* Footer Action */}
+                <div className="p-4 border-t border-white/10 bg-white/5 flex justify-end shrink-0">
+                  <button
+                    onClick={() => setAnalysisResult(null)}
+                    className="bg-gradient-to-tr from-teal-500 to-emerald-400 text-slate-950 px-5 py-2.5 rounded-xl text-xs font-bold hover:brightness-110 transition-colors shadow-lg cursor-pointer"
+                  >
+                    Entendido
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
         {/* MODAL PARA CONFIGURACIÓN DE VOZ */}
         <AnimatePresence>

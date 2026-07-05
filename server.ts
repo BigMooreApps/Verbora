@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import dotenv from "dotenv";
 import fs from "fs";
+import { EdgeTTS } from "edge-tts-universal";
 
 dotenv.config();
 
@@ -137,6 +138,21 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
       const { text, voiceName } = req.body;
       if (!text) {
         return res.status(400).json({ error: "BAD_REQUEST", message: "Falta el texto a sintetizar." });
+      }
+
+      // If it's a Microsoft Edge TTS voice, synthesize it keyless and 100% free!
+      if (voiceName.startsWith("edge-") || (voiceName.includes("Neural") && !voiceName.startsWith("en-US-Neural2-"))) {
+        const edgeVoice = voiceName.startsWith("edge-") ? voiceName.replace("edge-", "") : voiceName;
+        try {
+          const tts = new EdgeTTS();
+          await tts.setMetadata(edgeVoice, 'audio-24khz-48kbitrate-mono-mp3');
+          const audioBuffer = await tts.toBuffer(text);
+          const base64Audio = audioBuffer.toString('base64');
+          return res.json({ audio: base64Audio });
+        } catch (ttsErr: any) {
+          console.error("Error using EdgeTTS library:", ttsErr);
+          throw new Error(`EdgeTTS failed: ${ttsErr.message || ttsErr}`);
+        }
       }
 
       // Strict requirement: Only user's frontend API key is allowed for TTS to prevent server quota exhaustion

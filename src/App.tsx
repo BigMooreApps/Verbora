@@ -935,14 +935,14 @@ export default function App() {
           "gemini-kore": "Kore",
           "gemini-fenrir": "Fenrir",
           "gemini-zephyr": "Zephyr",
-          "gtts-en-US-Journey-F": "en-US-Journey-F",
-          "gtts-en-US-Journey-D": "en-US-Journey-D",
-          "gtts-en-US-Neural2-F": "en-US-Neural2-F",
-          "gtts-en-US-Neural2-D": "en-US-Neural2-D",
-          "gtts-en-US-Wavenet-C": "en-US-Wavenet-C",
-          "gtts-en-US-Wavenet-D": "en-US-Wavenet-D",
+          "edge-en-US-AriaNeural": "en-US-AriaNeural",
+          "edge-en-US-GuyNeural": "en-US-GuyNeural",
+          "edge-en-US-JennyNeural": "en-US-JennyNeural",
+          "edge-en-US-MichelleNeural": "en-US-MichelleNeural",
+          "edge-en-US-ChristopherNeural": "en-US-ChristopherNeural",
+          "edge-en-US-EricNeural": "en-US-EricNeural",
         };
-        const voiceName = voiceMapping[selectedVoiceName] || (selectedVoiceName.startsWith("gtts-") ? selectedVoiceName.replace("gtts-", "") : "Kore");
+        const voiceName = voiceMapping[selectedVoiceName] || (selectedVoiceName.startsWith("edge-") ? selectedVoiceName.replace("edge-", "") : "Kore");
         const cacheKey = `${text}_${voiceName}`;
 
         let audioData = ttsCacheRef.current[cacheKey];
@@ -1914,13 +1914,13 @@ export default function App() {
                           <option value="gemini-fenrir" className="bg-[#131b2e] text-white">Gemini Fenrir 👦 (Cálida y Directa)</option>
                         </optgroup>
 
-                        <optgroup label="☁️ Voces de Google Cloud TTS (Neural2 / Journey)" className="bg-[#131b2e] text-purple-300 font-semibold">
-                          <option value="gtts-en-US-Journey-F" className="bg-[#131b2e] text-white">Google Journey Female 👩 (Conversacional)</option>
-                          <option value="gtts-en-US-Journey-D" className="bg-[#131b2e] text-white">Google Journey Male 👨 (Conversacional)</option>
-                          <option value="gtts-en-US-Neural2-F" className="bg-[#131b2e] text-white">Google Neural2 Female 👩 (Fina y Clara)</option>
-                          <option value="gtts-en-US-Neural2-D" className="bg-[#131b2e] text-white">Google Neural2 Male 👨 (Natural y Dinámico)</option>
-                          <option value="gtts-en-US-Wavenet-C" className="bg-[#131b2e] text-white">Google Wavenet Female 👩 (Clásica y Clara)</option>
-                          <option value="gtts-en-US-Wavenet-D" className="bg-[#131b2e] text-white">Google Wavenet Male 👨 (Clásica y Directa)</option>
+                        <optgroup label="☁️ Voces de Microsoft Edge Neural (100% Gratis e Ilimitadas)" className="bg-[#131b2e] text-purple-300 font-semibold">
+                          <option value="edge-en-US-AriaNeural" className="bg-[#131b2e] text-white">Microsoft Aria 👩 (Natural y Fluida)</option>
+                          <option value="edge-en-US-GuyNeural" className="bg-[#131b2e] text-white">Microsoft Guy 👨 (Natural y Claro)</option>
+                          <option value="edge-en-US-JennyNeural" className="bg-[#131b2e] text-white">Microsoft Jenny 👩‍🦰 (Cálida y Amigable)</option>
+                          <option value="edge-en-US-MichelleNeural" className="bg-[#131b2e] text-white">Microsoft Michelle 👩 (Natural e Expresiva)</option>
+                          <option value="edge-en-US-ChristopherNeural" className="bg-[#131b2e] text-white">Microsoft Christopher 👨 (Voz de Noticiero)</option>
+                          <option value="edge-en-US-EricNeural" className="bg-[#131b2e] text-white">Microsoft Eric 👦 (Juvenil y Claro)</option>
                         </optgroup>
 
                         <optgroup label="🌐 Voces del Sistema" className="bg-[#131b2e] text-white/50">

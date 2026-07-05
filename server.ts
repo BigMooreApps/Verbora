@@ -148,12 +148,41 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
         });
       }
 
+      const cleanApiKey = (apiKey as string).trim();
+
+      // If it's a Google Cloud TTS voice
+      if (voiceName.includes("Neural2") || voiceName.includes("Journey") || voiceName.includes("Wavenet")) {
+        const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${cleanApiKey}`;
+        const result = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            input: { text: text },
+            voice: { languageCode: "en-US", name: voiceName },
+            audioConfig: { audioEncoding: "MP3" }
+          })
+        });
+
+        if (!result.ok) {
+          const errText = await result.text();
+          throw new Error(`Google Cloud TTS Status ${result.status}: ${errText}`);
+        }
+
+        const data = await result.json();
+        const base64Audio = data.audioContent;
+        if (!base64Audio) {
+          throw new Error("Google Cloud TTS no generó los datos de audio.");
+        }
+        return res.json({ audio: base64Audio });
+      }
+
+      // Default: Gemini TTS
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent`;
       const result = await fetch(url, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
-          "x-goog-api-key": (apiKey as string).trim()
+          "x-goog-api-key": cleanApiKey
         },
         body: JSON.stringify({
           contents: [{ parts: [{ text: text }] }],
@@ -186,16 +215,21 @@ Analiza la precisión de la pronunciación de cada palabra. Si el texto transcri
       
       const errStr = String(error) + " " + JSON.stringify(error);
       const isQuota = errStr.includes("429") || errStr.includes("quota") || errStr.includes("RESOURCE_EXHAUSTED") || errorMessage.includes("429") || errorMessage.includes("quota");
+      const isForbidden = errStr.includes("403") || errorMessage.includes("403") || errStr.includes("API_KEY_INVALID") || errStr.includes("not enabled") || errStr.includes("permission");
       
       if (isQuota) {
         errorCode = "QUOTA_EXHAUSTED";
-        errorMessage = "Has excedido el límite de cuota gratuita para la voz ultra-realista de Gemini TTS (máximo 10 peticiones al día o 3 por minuto). Por favor, intenta de nuevo en un momento o selecciona otra voz.";
-        console.warn("Límite de cuota gratuita de Gemini TTS alcanzado (Expected):", errorMessage);
+        errorMessage = "Has excedido el límite de cuota gratuita para la voz de IA. Por favor, intenta de nuevo en un momento o selecciona otra voz.";
+        console.warn("Límite de cuota gratuita de TTS alcanzado (Expected):", errorMessage);
+      } else if (isForbidden) {
+        errorCode = "FORBIDDEN";
+        errorMessage = "Error 403: Tu API Key no tiene permisos para Google Cloud Text-to-Speech. Asegúrate de habilitar la 'Text-to-Speech API' en tu consola de Google Cloud, o utiliza las voces de Gemini por defecto.";
+        console.warn("Permiso denegado para Google Cloud TTS:", errorMessage);
       } else {
-        console.error("Error generating Gemini TTS:", error);
+        console.error("Error generating TTS:", error);
       }
       
-      const status = errorCode === "QUOTA_EXHAUSTED" ? 429 : 500;
+      const status = errorCode === "QUOTA_EXHAUSTED" ? 429 : errorCode === "FORBIDDEN" ? 403 : 500;
       return res.status(status).json({
         error: errorCode,
         message: errorMessage,

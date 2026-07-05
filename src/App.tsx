@@ -645,7 +645,7 @@ export default function App() {
 
   const handleVoiceChange = (voiceName: string) => {
     setSelectedVoiceName(voiceName);
-    if (voiceName.startsWith("gemini-")) {
+    if (voiceName.startsWith("gemini-") || voiceName.startsWith("gtts-")) {
       setIsGeminiQuotaExhausted(false);
       try {
         localStorage.removeItem("gemini_tts_quota_exhausted_date");
@@ -913,9 +913,9 @@ export default function App() {
       currentAudioSourceRef.current = null;
     }
 
-    const isGeminiVoice = selectedVoiceName.startsWith("gemini-");
+    const isApiVoice = selectedVoiceName.startsWith("gemini-") || selectedVoiceName.startsWith("gtts-");
 
-    if (isGeminiVoice) {
+    if (isApiVoice) {
       if (!userApiKey) {
         setHighlightApiKey(true);
         setTimeout(() => setHighlightApiKey(false), 2500);
@@ -935,8 +935,14 @@ export default function App() {
           "gemini-kore": "Kore",
           "gemini-fenrir": "Fenrir",
           "gemini-zephyr": "Zephyr",
+          "gtts-en-US-Journey-F": "en-US-Journey-F",
+          "gtts-en-US-Journey-D": "en-US-Journey-D",
+          "gtts-en-US-Neural2-F": "en-US-Neural2-F",
+          "gtts-en-US-Neural2-D": "en-US-Neural2-D",
+          "gtts-en-US-Wavenet-C": "en-US-Wavenet-C",
+          "gtts-en-US-Wavenet-D": "en-US-Wavenet-D",
         };
-        const voiceName = voiceMapping[selectedVoiceName] || "Kore";
+        const voiceName = voiceMapping[selectedVoiceName] || (selectedVoiceName.startsWith("gtts-") ? selectedVoiceName.replace("gtts-", "") : "Kore");
         const cacheKey = `${text}_${voiceName}`;
 
         let audioData = ttsCacheRef.current[cacheKey];
@@ -1906,6 +1912,15 @@ export default function App() {
                           <option value="gemini-puck" className="bg-[#131b2e] text-white">Gemini Puck 👨‍🦱 (Juvenil y Amigable)</option>
                           <option value="gemini-charon" className="bg-[#131b2e] text-white">Gemini Charon 🧔 (Profunda y Serena)</option>
                           <option value="gemini-fenrir" className="bg-[#131b2e] text-white">Gemini Fenrir 👦 (Cálida y Directa)</option>
+                        </optgroup>
+
+                        <optgroup label="☁️ Voces de Google Cloud TTS (Neural2 / Journey)" className="bg-[#131b2e] text-purple-300 font-semibold">
+                          <option value="gtts-en-US-Journey-F" className="bg-[#131b2e] text-white">Google Journey Female 👩 (Conversacional)</option>
+                          <option value="gtts-en-US-Journey-D" className="bg-[#131b2e] text-white">Google Journey Male 👨 (Conversacional)</option>
+                          <option value="gtts-en-US-Neural2-F" className="bg-[#131b2e] text-white">Google Neural2 Female 👩 (Fina y Clara)</option>
+                          <option value="gtts-en-US-Neural2-D" className="bg-[#131b2e] text-white">Google Neural2 Male 👨 (Natural y Dinámico)</option>
+                          <option value="gtts-en-US-Wavenet-C" className="bg-[#131b2e] text-white">Google Wavenet Female 👩 (Clásica y Clara)</option>
+                          <option value="gtts-en-US-Wavenet-D" className="bg-[#131b2e] text-white">Google Wavenet Male 👨 (Clásica y Directa)</option>
                         </optgroup>
 
                         <optgroup label="🌐 Voces del Sistema" className="bg-[#131b2e] text-white/50">

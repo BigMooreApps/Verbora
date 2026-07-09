@@ -1297,12 +1297,20 @@ export default function App() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="flex flex-col items-center justify-center px-6 text-center"
             >
-              <img 
-                src={letrasVerbora} 
-                alt="Verbora Logo" 
-                className="w-[85vw] max-w-[600px] h-auto object-contain select-none animate-pulse"
-                referrerPolicy="no-referrer"
-              />
+              <div className="flex flex-col items-center gap-4">
+                <img 
+                  src={iconoVerbora} 
+                  alt="Verbora Icon" 
+                  className="w-[35vw] max-w-[200px] h-auto object-contain select-none"
+                  referrerPolicy="no-referrer"
+                />
+                <img 
+                  src={letrasVerbora} 
+                  alt="Verbora" 
+                  className="w-[60vw] max-w-[360px] h-auto object-contain select-none"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
             </motion.div>
           </motion.div>
         )}

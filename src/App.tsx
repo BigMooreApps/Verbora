@@ -1298,7 +1298,7 @@ export default function App() {
               className="flex flex-col items-center justify-center px-6 text-center"
             >
               <img 
-                src={logoVerbora} 
+                src={letrasVerbora} 
                 alt="Verbora Logo" 
                 className="w-[85vw] max-w-[600px] h-auto object-contain select-none animate-pulse"
                 referrerPolicy="no-referrer"

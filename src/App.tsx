@@ -645,7 +645,7 @@ export default function App() {
 
   const handleVoiceChange = (voiceName: string) => {
     setSelectedVoiceName(voiceName);
-    if (voiceName.startsWith("gemini-") || voiceName.startsWith("gtts-")) {
+    if (voiceName.startsWith("gemini-")) {
       setIsGeminiQuotaExhausted(false);
       try {
         localStorage.removeItem("gemini_tts_quota_exhausted_date");
@@ -913,7 +913,7 @@ export default function App() {
       currentAudioSourceRef.current = null;
     }
 
-    const isApiVoice = selectedVoiceName.startsWith("gemini-") || selectedVoiceName.startsWith("gtts-");
+    const isApiVoice = selectedVoiceName.startsWith("gemini-");
 
     if (isApiVoice) {
       if (!userApiKey) {
@@ -935,14 +935,8 @@ export default function App() {
           "gemini-kore": "Kore",
           "gemini-fenrir": "Fenrir",
           "gemini-zephyr": "Zephyr",
-          "edge-en-US-AriaNeural": "en-US-AriaNeural",
-          "edge-en-US-GuyNeural": "en-US-GuyNeural",
-          "edge-en-US-JennyNeural": "en-US-JennyNeural",
-          "edge-en-US-MichelleNeural": "en-US-MichelleNeural",
-          "edge-en-US-ChristopherNeural": "en-US-ChristopherNeural",
-          "edge-en-US-EricNeural": "en-US-EricNeural",
         };
-        const voiceName = voiceMapping[selectedVoiceName] || (selectedVoiceName.startsWith("edge-") ? selectedVoiceName.replace("edge-", "") : "Kore");
+        const voiceName = voiceMapping[selectedVoiceName] || "Kore";
         const cacheKey = `${text}_${voiceName}`;
 
         let audioData = ttsCacheRef.current[cacheKey];
@@ -1914,14 +1908,7 @@ export default function App() {
                           <option value="gemini-fenrir" className="bg-[#131b2e] text-white">Gemini Fenrir 👦 (Cálida y Directa)</option>
                         </optgroup>
 
-                        <optgroup label="☁️ Voces de Microsoft Edge Neural (100% Gratis e Ilimitadas)" className="bg-[#131b2e] text-purple-300 font-semibold">
-                          <option value="edge-en-US-AriaNeural" className="bg-[#131b2e] text-white">Microsoft Aria 👩 (Natural y Fluida)</option>
-                          <option value="edge-en-US-GuyNeural" className="bg-[#131b2e] text-white">Microsoft Guy 👨 (Natural y Claro)</option>
-                          <option value="edge-en-US-JennyNeural" className="bg-[#131b2e] text-white">Microsoft Jenny 👩‍🦰 (Cálida y Amigable)</option>
-                          <option value="edge-en-US-MichelleNeural" className="bg-[#131b2e] text-white">Microsoft Michelle 👩 (Natural e Expresiva)</option>
-                          <option value="edge-en-US-ChristopherNeural" className="bg-[#131b2e] text-white">Microsoft Christopher 👨 (Voz de Noticiero)</option>
-                          <option value="edge-en-US-EricNeural" className="bg-[#131b2e] text-white">Microsoft Eric 👦 (Juvenil y Claro)</option>
-                        </optgroup>
+
 
                         <optgroup label="🌐 Voces del Sistema" className="bg-[#131b2e] text-white/50">
                           <option value="" className="bg-[#131b2e] text-white">Predeterminada del sistema</option>

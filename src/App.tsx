@@ -1509,7 +1509,7 @@ export default function App() {
             <img 
               src={letrasVerbora} 
               alt="Verbora" 
-              className="h-[43px] sm:h-[50px] object-contain my-[-6px] sm:my-[-7px]"
+              className="h-[30px] sm:h-[35px] object-contain"
               referrerPolicy="no-referrer"
             />
           </div>
